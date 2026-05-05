@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+"""Genera 35 estudiantes de muestra con correlación realista (r≈0.73)
+entre porcentaje de asistencia y promedio final (Hipótesis A)."""
+
+from data.estudiante import Estudiante
+
+_ROWS = [
+    # id, nombre, carrera, sem, materia, p1,   p2,   p3,   tar,  proy, asist, h_est, h_plat, trab,  h_trab
+    ("01","Ana García",          "Ingeniería en Sistemas",  3,"Probabilidad y Estadística", 9.0, 8.5, 9.5, 9.0, 9.5, 95, 15, 4.0, False,  0),
+    ("02","Carlos López",        "Ingeniería Industrial",   5,"Probabilidad y Estadística", 8.5, 9.0, 8.5, 8.5, 9.0, 92, 12, 3.5, True,  15),
+    ("03","María Hernández",     "Administración",          2,"Probabilidad y Estadística", 8.0, 8.5, 9.0, 8.5, 8.5, 90, 10, 3.0, False,  0),
+    ("04","José Martínez",       "Ingeniería en Sistemas",  4,"Probabilidad y Estadística", 9.5, 8.5, 8.5, 9.0, 8.0, 90, 14, 4.0, False,  0),
+    ("05","Laura Sánchez",       "Contabilidad",            6,"Probabilidad y Estadística", 8.5, 8.0, 8.5, 8.5, 9.0, 88, 11, 3.0, True,  20),
+    ("06","Diego Ramírez",       "Ingeniería Industrial",   3,"Probabilidad y Estadística", 8.0, 9.0, 8.5, 8.0, 8.5, 88, 12, 3.5, False,  0),
+    ("07","Valentina Cruz",      "Mercadotecnia",           4,"Probabilidad y Estadística", 8.5, 7.5, 8.5, 9.0, 8.5, 87,  9, 2.5, False,  0),
+    ("08","Rodrigo Flores",      "Administración",          2,"Probabilidad y Estadística", 8.0, 8.5, 8.0, 8.5, 8.0, 86, 10, 3.0, False,  0),
+    ("09","Isabella Torres",     "Ingeniería en Sistemas",  5,"Probabilidad y Estadística", 9.0, 8.0, 8.5, 8.0, 8.5, 86, 13, 4.0, False,  0),
+    ("10","Alejandro Morales",   "Derecho",                 3,"Probabilidad y Estadística", 8.0, 7.5, 8.5, 8.5, 9.0, 85,  8, 2.0, False,  0),
+    ("11","Camila Jiménez",      "Contabilidad",            4,"Probabilidad y Estadística", 7.5, 8.0, 8.0, 7.5, 8.0, 83,  8, 2.5, False,  0),
+    ("12","Sebastián Gutiérrez", "Ingeniería Industrial",   6,"Probabilidad y Estadística", 7.5, 8.5, 7.5, 7.0, 8.0, 82,  9, 3.0, False,  0),
+    ("13","Gabriela Vásquez",    "Diseño Gráfico",          2,"Probabilidad y Estadística", 8.0, 7.0, 7.5, 8.0, 8.0, 81,  6, 2.0, False,  0),
+    ("14","Mateo Vargas",        "Administración",          3,"Probabilidad y Estadística", 7.0, 8.0, 7.5, 7.0, 8.0, 80,  7, 2.0, True,  20),
+    ("15","Sofía Ramos",         "Mercadotecnia",           5,"Probabilidad y Estadística", 7.5, 7.0, 8.0, 8.0, 7.5, 80,  8, 2.5, False,  0),
+    ("16","Daniel Herrera",      "Ingeniería en Sistemas",  2,"Probabilidad y Estadística", 8.0, 7.0, 7.0, 7.5, 7.5, 79,  9, 3.0, False,  0),
+    ("17","Valeria Mendoza",     "Contabilidad",            4,"Probabilidad y Estadística", 7.0, 7.5, 7.5, 7.5, 8.0, 78,  7, 2.0, False,  0),
+    ("18","Santiago Díaz",       "Derecho",                 6,"Probabilidad y Estadística", 7.0, 7.5, 7.5, 7.0, 7.0, 77,  8, 2.0, True,  25),
+    ("19","Emilia Reyes",        "Ingeniería Industrial",   3,"Probabilidad y Estadística", 7.0, 7.5, 7.0, 7.0, 7.5, 76,  6, 2.0, False,  0),
+    ("20","Nicolás Gómez",       "Diseño Gráfico",          2,"Probabilidad y Estadística", 7.0, 7.5, 7.0, 6.5, 7.5, 75,  5, 1.5, False,  0),
+    ("21","Mariana Castillo",    "Administración",          4,"Probabilidad y Estadística", 7.5, 6.5, 7.5, 7.5, 7.0, 75,  7, 2.0, False,  0),
+    ("22","Andrés Ortiz",        "Mercadotecnia",           3,"Probabilidad y Estadística", 7.0, 7.0, 7.5, 6.5, 7.0, 73,  5, 1.5, True,  30),
+    ("23","Fernanda Ruiz",       "Contabilidad",            5,"Probabilidad y Estadística", 6.5, 7.5, 7.0, 7.0, 7.5, 72,  6, 2.0, False,  0),
+    ("24","Pablo Navarro",       "Ingeniería en Sistemas",  3,"Probabilidad y Estadística", 6.0, 7.0, 7.0, 6.5, 6.5, 68,  4, 1.5, False,  0),
+    ("25","Lucía Pérez",         "Administración",          2,"Probabilidad y Estadística", 6.5, 6.5, 7.0, 7.0, 6.5, 67,  5, 1.5, False,  0),
+    ("26","Tomás Suárez",        "Derecho",                 4,"Probabilidad y Estadística", 6.0, 7.0, 6.5, 6.0, 7.0, 65,  4, 1.0, True,  32),
+    ("27","Renata Molina",       "Ingeniería Industrial",   3,"Probabilidad y Estadística", 6.5, 6.5, 6.5, 6.5, 6.0, 65,  5, 1.5, False,  0),
+    ("28","Mauricio Vargas",     "Mercadotecnia",           5,"Probabilidad y Estadística", 6.0, 6.5, 6.0, 6.5, 6.0, 63,  3, 1.0, True,  35),
+    ("29","Daniela Aguirre",     "Diseño Gráfico",          2,"Probabilidad y Estadística", 6.0, 6.0, 6.5, 6.5, 6.5, 62,  4, 1.5, False,  0),
+    ("30","Xavier Mora",         "Contabilidad",            3,"Probabilidad y Estadística", 5.5, 6.5, 6.0, 6.0, 6.5, 60,  3, 1.0, True,  40),
+    ("31","Catalina Ríos",       "Ingeniería en Sistemas",  4,"Probabilidad y Estadística", 5.5, 6.0, 6.0, 5.5, 6.5, 58,  3, 1.0, False,  0),
+    ("32","Esteban Cabrera",     "Administración",          2,"Probabilidad y Estadística", 5.0, 6.0, 6.5, 5.5, 5.5, 57,  2, 1.0, True,  40),
+    ("33","Natalia Espinoza",    "Derecho",                 5,"Probabilidad y Estadística", 5.5, 5.5, 6.0, 5.5, 6.0, 55,  3, 1.0, False,  0),
+    ("34","Iván Rojas",          "Ingeniería Industrial",   3,"Probabilidad y Estadística", 5.0, 5.5, 5.5, 5.5, 6.0, 53,  2, 0.5, False,  0),
+    ("35","Paola Méndez",        "Mercadotecnia",           4,"Probabilidad y Estadística", 5.0, 5.0, 5.5, 5.0, 5.5, 50,  2, 0.5, False,  0),
+]
+
+
+def generar_datos_muestra() -> list:
+    return [Estudiante(*r) for r in _ROWS]
