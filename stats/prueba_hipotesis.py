@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Pruebas de hipótesis para la Hipótesis A.
+"""Prueba de hipótesis — Hipótesis B (Opción B).
 
-H₀: ρ ≤ 0  (la asistencia NO influye positivamente en el promedio)
-H₁: ρ > 0  (la asistencia SÍ influye positivamente — cola derecha)
+H₀: μ_trabaja ≥ μ_no_trabaja   (trabajar no reduce el promedio)
+H₁: μ_trabaja < μ_no_trabaja   (los que trabajan tienen promedio MENOR)
 
-Prueba t para el coeficiente de correlación de Pearson.
+Prueba t de Welch para dos muestras independientes, una cola izquierda.
 """
 import numpy as np
 from scipy import stats as sp_stats
@@ -12,73 +12,106 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ResultadoPrueba:
+class ResultadoPruebaB:
     hipotesis_nula: str
-    hipotesis_alt: str
-    r: float
-    t_estadistico: float
-    grados_libertad: int
-    p_valor: float          # una cola (derecha)
-    alpha: float
-    rechazar_h0: bool
-    ic_r_inf: float         # intervalo de confianza para ρ (Fisher)
-    ic_r_sup: float
-    conclusion: str
+    hipotesis_alt:  str
+    n_trabaja:      int
+    n_no_trabaja:   int
+    media_trabaja:  float
+    media_no_trabaja: float
+    diferencia:     float          # media_trabaja - media_no_trabaja
+    std_trabaja:    float
+    std_no_trabaja: float
+    t_estadistico:  float
+    grados_libertad: float
+    p_valor:        float          # una cola (izquierda)
+    alpha:          float
+    rechazar_h0:    bool
+    ic_dif_inf:     float          # IC 95% de la diferencia
+    ic_dif_sup:     float
+    d_cohen:        float          # tamaño del efecto
+    conclusion:     str
 
-    def tabla(self) -> list[tuple[str, str]]:
+    def tabla_grupos(self) -> list[tuple[str, str, str]]:
+        """Encabezado + 2 filas: (campo, trabaja, no_trabaja)."""
         return [
-            ("Hipótesis nula H₀",          self.hipotesis_nula),
-            ("Hipótesis alternativa H₁",   self.hipotesis_alt),
-            ("Correlación de Pearson (r)",  f"{self.r:.4f}"),
-            ("Estadístico t",               f"{self.t_estadistico:.4f}"),
-            ("Grados de libertad",          str(self.grados_libertad)),
-            ("p-valor (una cola)",          f"{self.p_valor:.4f}"),
-            ("Nivel de significancia α",    f"{self.alpha}"),
-            ("¿Rechazar H₀?",              "SÍ ✓" if self.rechazar_h0 else "NO ✗"),
-            ("IC 95% para ρ",              f"[{self.ic_r_inf:.4f}, {self.ic_r_sup:.4f}]"),
-            ("Conclusión",                 self.conclusion),
+            ("",                   "Trabaja",                    "No Trabaja"),
+            ("n",                  str(self.n_trabaja),          str(self.n_no_trabaja)),
+            ("Media (x̄)",         f"{self.media_trabaja:.4f}",  f"{self.media_no_trabaja:.4f}"),
+            ("Desv. estándar (s)", f"{self.std_trabaja:.4f}",    f"{self.std_no_trabaja:.4f}"),
+        ]
+
+    def tabla_prueba(self) -> list[tuple[str, str]]:
+        return [
+            ("Hipótesis nula H₀",         self.hipotesis_nula),
+            ("Hipótesis alternativa H₁",  self.hipotesis_alt),
+            ("Diferencia (μ₁ − μ₂)",      f"{self.diferencia:.4f}"),
+            ("Estadístico t (Welch)",      f"{self.t_estadistico:.4f}"),
+            ("Grados de libertad",         f"{self.grados_libertad:.2f}"),
+            ("p-valor (una cola)",         f"{self.p_valor:.4f}"),
+            ("Nivel de significancia α",   str(self.alpha)),
+            ("¿Rechazar H₀?",             "SÍ ✓" if self.rechazar_h0 else "NO ✗"),
+            ("IC 95% diferencia",         f"[{self.ic_dif_inf:.4f}, {self.ic_dif_sup:.4f}]"),
+            ("d de Cohen (tamaño efecto)",f"{self.d_cohen:.4f}"),
+            ("Conclusión",                self.conclusion),
         ]
 
 
-def prueba_correlacion(x: list[float], y: list[float], alpha: float = 0.05) -> ResultadoPrueba:
-    xa = np.array(x, dtype=float)
-    ya = np.array(y, dtype=float)
-    n = len(xa)
+def prueba_hipotesis_B(
+    promedios_trabaja: list[float],
+    promedios_no_trabaja: list[float],
+    alpha: float = 0.05,
+) -> ResultadoPruebaB:
+    """Prueba t de Welch unilateral izquierda para Hipótesis B."""
+    g1 = np.array(promedios_trabaja,    dtype=float)
+    g2 = np.array(promedios_no_trabaja, dtype=float)
 
-    r, _ = sp_stats.pearsonr(xa, ya)
-    t_stat = r * np.sqrt(n - 2) / np.sqrt(1 - r ** 2)
-    gl = n - 2
-    p_val = float(sp_stats.t.sf(t_stat, df=gl))   # cola derecha
+    n1, n2 = len(g1), len(g2)
+    m1, m2 = g1.mean(), g2.mean()
+    s1, s2 = g1.std(ddof=1), g2.std(ddof=1)
 
-    # Intervalo de confianza usando transformación z de Fisher (95 %)
-    z = np.arctanh(r)
-    se_z = 1.0 / np.sqrt(n - 3)
-    z_crit = sp_stats.norm.ppf(0.975)
-    ic_inf = float(np.tanh(z - z_crit * se_z))
-    ic_sup = float(np.tanh(z + z_crit * se_z))
+    # t de Welch, alternative='less' → H₁: mean(g1) < mean(g2)
+    t_stat, p_val = sp_stats.ttest_ind(g1, g2, equal_var=False, alternative="less")
 
-    rechazar = p_val < alpha
+    # Grados de libertad de Welch-Satterthwaite
+    v1, v2 = s1**2 / n1, s2**2 / n2
+    gl = (v1 + v2)**2 / (v1**2 / (n1 - 1) + v2**2 / (n2 - 1))
+
+    # IC 95% para la diferencia de medias (bilateral)
+    se = np.sqrt(v1 + v2)
+    t_crit = sp_stats.t.ppf(0.975, df=gl)
+    dif = m1 - m2
+    ic_inf, ic_sup = dif - t_crit * se, dif + t_crit * se
+
+    # d de Cohen (pooled std)
+    sp = np.sqrt(((n1 - 1) * s1**2 + (n2 - 1) * s2**2) / (n1 + n2 - 2))
+    d_cohen = dif / sp if sp > 0 else 0.0
+
+    rechazar = bool(p_val < alpha)
     if rechazar:
         conclusion = (
-            f"Con α = {alpha}, se RECHAZA H₀. Existe evidencia estadística suficiente "
-            f"de correlación positiva entre asistencia y promedio (p = {p_val:.4f})."
+            f"Con α = {alpha} se RECHAZA H₀. Los estudiantes que trabajan tienen "
+            f"un promedio significativamente menor (Δ = {dif:.2f}, p = {p_val:.4f})."
         )
     else:
         conclusion = (
-            f"Con α = {alpha}, NO se rechaza H₀. No hay evidencia suficiente "
-            f"de correlación positiva (p = {p_val:.4f})."
+            f"Con α = {alpha} NO se rechaza H₀. No hay evidencia suficiente de que "
+            f"trabajar reduzca el promedio (p = {p_val:.4f})."
         )
 
-    return ResultadoPrueba(
-        hipotesis_nula="ρ ≤ 0 (sin correlación positiva)",
-        hipotesis_alt="ρ > 0 (correlación positiva entre asistencia y promedio)",
-        r=float(r),
+    return ResultadoPruebaB(
+        hipotesis_nula="μ_trabaja ≥ μ_no_trabaja (trabajar no afecta el promedio)",
+        hipotesis_alt="μ_trabaja < μ_no_trabaja (los que trabajan tienen menor promedio)",
+        n_trabaja=n1, n_no_trabaja=n2,
+        media_trabaja=float(m1), media_no_trabaja=float(m2),
+        diferencia=float(dif),
+        std_trabaja=float(s1), std_no_trabaja=float(s2),
         t_estadistico=float(t_stat),
-        grados_libertad=gl,
-        p_valor=p_val,
+        grados_libertad=float(gl),
+        p_valor=float(p_val),
         alpha=alpha,
         rechazar_h0=rechazar,
-        ic_r_inf=ic_inf,
-        ic_r_sup=ic_sup,
+        ic_dif_inf=float(ic_inf), ic_dif_sup=float(ic_sup),
+        d_cohen=float(d_cohen),
         conclusion=conclusion,
     )

@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Modelo predictivo: combina regresión lineal con distribución normal
-para estimar la calificación esperada y la probabilidad de aprobar."""
+"""Modelo predictivo basado en Hipótesis B (situación laboral → promedio).
+
+Usa las medias y desviaciones del grupo "trabaja" vs "no trabaja" para
+estimar la calificación esperada y la probabilidad de aprobar.
+"""
 import numpy as np
 from scipy import stats as sp_stats
 from dataclasses import dataclass
-from stats.regresion_lineal import ModeloRegresion, ajustar
 
 
 @dataclass
 class ResultadoPrediccion:
     calificacion_predicha: float
-    prob_aprobar: float         # P(Y ≥ 6)
+    prob_aprobar: float         # P(Y >= 6)
     prob_reprobar: float        # P(Y < 6)
     nivel: str
     profecia: str
@@ -41,52 +43,66 @@ def _profecia(nivel: str, seed: int = 0) -> str:
     return opciones[seed % len(opciones)]
 
 
-def _recomendaciones(asistencia: float, horas_estudio: float,
-                     trabaja: bool, nivel: str) -> list[str]:
+def _recomendaciones(trabaja: bool, horas_estudio: float, nivel: str) -> list[str]:
     rec = []
-    if asistencia < 85:
-        faltantes = max(0, round((85 - asistencia) / 100 * 16))
-        rec.append(f"Aumenta tu asistencia — faltan ≈{faltantes} clases para llegar a 85 %.")
-    if horas_estudio < 10:
-        rec.append(f"Estudia al menos {10 - int(horas_estudio)} horas más por semana.")
     if trabaja:
-        rec.append("Organiza un horario fijo: el trabajo no debe competir con la asistencia.")
+        rec.append(
+            "Tu situación laboral reduce el tiempo disponible para estudiar. "
+            "Organiza un horario fijo y protege tus horas de estudio."
+        )
+        if nivel in ("En Riesgo", "Medio"):
+            rec.append(
+                "Evalúa reducir horas de trabajo si es posible, "
+                "o busca apoyo institucional (becas, tutorías)."
+            )
+    if horas_estudio < 10:
+        extra = 10 - int(horas_estudio)
+        rec.append(f"Incrementa tu tiempo de estudio — al menos {extra} hrs/sem más harán diferencia.")
     if nivel == "En Riesgo":
         rec.append("Solicita asesoría académica con tu docente esta semana.")
         rec.append("Usa plataformas educativas (Khan Academy, YouTube) para reforzar temas.")
     if nivel in ("En Riesgo", "Medio"):
         rec.append("Forma un grupo de estudio con compañeros de alto rendimiento.")
     if not rec:
-        rec.append("¡Mantén el ritmo! Sigue asistiendo y estudiando con constancia.")
+        rec.append("¡Mantén el ritmo! Sigue estudiando con constancia y disciplina.")
     return rec
 
 
 class Oraculo:
+    """Predice el promedio usando estadísticas del grupo (trabaja / no trabaja)."""
+
     def __init__(self):
-        self._modelo: ModeloRegresion | None = None
+        self._m_trab: float = 7.0
+        self._s_trab: float = 1.0
+        self._m_no:   float = 7.5
+        self._s_no:   float = 1.0
+        self._trained: bool = False
 
-    def entrenar(self, asistencias: list[float], promedios: list[float]):
-        self._modelo = ajustar(asistencias, promedios)
+    def entrenar(self, promedios_trabaja: list[float], promedios_no_trabaja: list[float]):
+        g1 = [x for x in promedios_trabaja   if x is not None]
+        g2 = [x for x in promedios_no_trabaja if x is not None]
+        if len(g1) >= 2:
+            self._m_trab = float(np.mean(g1))
+            self._s_trab = max(float(np.std(g1, ddof=1)), 0.1)
+        if len(g2) >= 2:
+            self._m_no = float(np.mean(g2))
+            self._s_no = max(float(np.std(g2, ddof=1)), 0.1)
+        self._trained = True
 
-    def predecir(self, asistencia: float, horas_estudio: float,
-                 trabaja: bool = False, seed: int = 0) -> ResultadoPrediccion:
-        if self._modelo is None:
-            raise RuntimeError("Modelo no entrenado. Llama a entrenar() primero.")
+    def predecir(self, trabaja: bool, horas_estudio: float = 0.0,
+                 seed: int = 0) -> ResultadoPrediccion:
+        base = self._m_trab if trabaja else self._m_no
+        se   = self._s_trab if trabaja else self._s_no
 
-        cal = self._modelo.predecir(asistencia)
-        # Ajuste leve por horas de estudio (contribución secundaria)
-        cal += (horas_estudio - self._modelo.x_mean * 0.12) * 0.03
-        cal = round(min(10.0, max(0.0, cal)), 2)
+        ajuste = (horas_estudio - 10) * 0.04
+        cal = round(min(10.0, max(0.0, base + ajuste)), 2)
 
-        # Probabilidad usando distribución normal centrada en la predicción
-        se = max(self._modelo.error_std, 0.1)
         prob_ap = float(sp_stats.norm.sf(5.9, loc=cal, scale=se))
         prob_ap = max(0.0, min(1.0, prob_ap))
 
-        # Clasificación
-        if cal >= 8.5 and asistencia >= 85:
+        if cal >= 8.5:
             nivel = "Alto Rendimiento"
-        elif cal >= 7.0 and asistencia >= 70:
+        elif cal >= 7.0:
             nivel = "Medio"
         else:
             nivel = "En Riesgo"
@@ -97,9 +113,13 @@ class Oraculo:
             prob_reprobar=1 - prob_ap,
             nivel=nivel,
             profecia=_profecia(nivel, seed),
-            recomendaciones=_recomendaciones(asistencia, horas_estudio, trabaja, nivel),
+            recomendaciones=_recomendaciones(trabaja, horas_estudio, nivel),
         )
 
     @property
-    def modelo(self) -> ModeloRegresion | None:
-        return self._modelo
+    def media_trabaja(self) -> float:
+        return self._m_trab
+
+    @property
+    def media_no_trabaja(self) -> float:
+        return self._m_no

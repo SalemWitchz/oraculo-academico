@@ -49,19 +49,19 @@ class HomeScreen:
         hip = GothicCard(parent, padx=24, pady=14)
         hip.pack(padx=30, pady=14, fill="x")
 
-        tk.Label(hip, text="Hipótesis a Validar (Opción A)",
+        tk.Label(hip, text="Hipótesis a Validar (Opción B)",
                  font=("Palatino Linotype", 14, "bold"),
                  fg=COLOR_GOLD, bg=BG_CARD).pack(anchor="w")
         tk.Label(hip,
-                 text="H₁: El porcentaje de asistencia influye positivamente en el promedio final.",
+                 text="H₁: Los estudiantes que trabajan tienen un promedio menor a los que no trabajan.  (μ_trabaja < μ_no_trabaja)",
                  font=("Palatino Linotype", 12, "italic"),
                  fg="#A09060", bg=BG_CARD).pack(anchor="w", pady=(4, 0))
         tk.Label(hip,
-                 text="H₀: ρ ≤ 0   (sin correlación positiva entre asistencia y promedio)",
+                 text="H₀: μ_trabaja ≥ μ_no_trabaja   (trabajar no reduce el promedio)",
                  font=("Palatino Linotype", 11),
                  fg=COLOR_GOLD_DIM, bg=BG_CARD).pack(anchor="w", pady=(2, 0))
         tk.Label(hip,
-                 text="Método: Prueba t para la correlación de Pearson · Regresión lineal simple · α = 0.05",
+                 text="Método: Prueba t de Welch para dos muestras independientes · Una cola izquierda · α = 0.05",
                  font=("Palatino Linotype", 10),
                  fg=COLOR_BORDER, bg=BG_CARD).pack(anchor="w", pady=(2, 0))
 

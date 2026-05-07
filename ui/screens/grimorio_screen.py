@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""✧ El Grimorio de Datos — Estadística descriptiva, gráficas e hipótesis."""
+"""✧ El Grimorio de Datos — Estadística descriptiva, gráficas e hipótesis B."""
 import tkinter as tk
 import numpy as np
 import matplotlib
@@ -14,9 +14,8 @@ from config import (
 )
 from data.data_store import DataStore
 from stats import descriptiva as desc_mod
-from stats.regresion_lineal import ajustar
-from stats.prueba_hipotesis import prueba_correlacion
-from ui.widgets import GothicCard, ScrollableFrame, SectionTitle, TablaSimple, ornamento
+from stats.prueba_hipotesis import prueba_hipotesis_B
+from ui.widgets import GothicCard, ScrollableFrame, SectionTitle, TablaSimple
 
 
 class GrimorioScreen:
@@ -36,6 +35,9 @@ class GrimorioScreen:
         promedios   = ds.promedios()
         asistencias = ds.asistencias()
 
+        prom_trab  = [e.promedio_final for e in est if     e.trabaja]
+        prom_no    = [e.promedio_final for e in est if not e.trabaja]
+
         scroll = ScrollableFrame(parent)
         scroll.pack(fill="both", expand=True)
         inner = scroll.inner
@@ -52,20 +54,20 @@ class GrimorioScreen:
         # ── Fila: Descriptiva Promedios + Asistencia ─────────────────
         row1 = tk.Frame(inner, bg=BG_MAIN)
         row1.pack(fill="x", padx=16, pady=4)
-        self._tabla_descriptiva(row1, promedios, "Promedio Final")
+        self._tabla_descriptiva(row1, promedios,   "Promedio Final")
         self._tabla_descriptiva(row1, asistencias, "Asistencia (%)")
 
-        # ── Fila: Regresión + Prueba de Hipótesis ────────────────────
+        # ── Fila: Grupos (H_B) + Prueba de Hipótesis B ───────────────
         row2 = tk.Frame(inner, bg=BG_MAIN)
         row2.pack(fill="x", padx=16, pady=4)
-        self._tabla_regresion(row2, asistencias, promedios)
-        self._tabla_hipotesis(row2, asistencias, promedios)
+        self._tabla_grupos(row2, prom_trab, prom_no)
+        self._tabla_hipotesis_B(row2, prom_trab, prom_no)
 
         # ── Gráficas ─────────────────────────────────────────────────
         SectionTitle(inner, "Visualizaciones del Grimorio", bg=BG_MAIN
                      ).pack(anchor="w", padx=18, pady=(10, 4))
 
-        self._graficas(inner, est, asistencias, promedios)
+        self._graficas(inner, est, prom_trab, prom_no, promedios)
 
         tk.Label(inner, text="", bg=BG_MAIN).pack(pady=10)
 
@@ -84,44 +86,77 @@ class GrimorioScreen:
         ]
         TablaSimple(card, filas, bg=BG_CARD).pack(fill="x")
 
-    def _tabla_regresion(self, parent, x, y):
-        modelo = ajustar(x, y)
+    def _tabla_grupos(self, parent, prom_trab, prom_no):
         card = GothicCard(parent, padx=0, pady=0)
         card.pack(side="left", fill="both", expand=True, padx=6, pady=4)
-        tk.Label(card, text="Regresión Lineal · Asistencia → Promedio",
+        tk.Label(card, text="Comparación de Grupos — Hipótesis B",
                  font=("Palatino Linotype", 12, "bold"),
                  fg=COLOR_GOLD, bg=BG_CARD, pady=6).pack(anchor="w", padx=10)
-        TablaSimple(card, modelo.tabla(), bg=BG_CARD).pack(fill="x")
 
-    def _tabla_hipotesis(self, parent, x, y):
-        resultado = prueba_correlacion(x, y)
+        def fmt(vals):
+            if not vals:
+                return ("0", "—", "—")
+            a = np.array(vals, dtype=float)
+            return (str(len(a)), f"{a.mean():.4f}",
+                    f"{a.std(ddof=1):.4f}" if len(a) > 1 else "—")
+
+        n1, m1, s1 = fmt(prom_trab)
+        n2, m2, s2 = fmt(prom_no)
+        filas = [
+            ("",                   "Trabaja",  "No trabaja"),
+            ("n",                  n1,         n2),
+            ("Media (x̄)",         m1,         m2),
+            ("Desv. estándar (s)", s1,         s2),
+        ]
+
+        for i, fila in enumerate(filas):
+            bg = BG_CARD if i % 2 == 0 else "#12001E"
+            row = tk.Frame(card, bg=bg)
+            row.pack(fill="x")
+            widths = [22, 12, 12]
+            for j, (cell, w) in enumerate(zip(fila, widths)):
+                anchor = "w" if j == 0 else "center"
+                tk.Label(row, text=cell, font=FONT_SMALL,
+                         fg=COLOR_GOLD if i == 0 else COLOR_GOLD_DIM,
+                         bg=bg, width=w, anchor=anchor,
+                         padx=6, pady=3).pack(side="left")
+
+    def _tabla_hipotesis_B(self, parent, prom_trab, prom_no):
         card = GothicCard(parent, padx=0, pady=0)
         card.pack(side="left", fill="both", expand=True, padx=6, pady=4)
-
-        color_veredicto = COLOR_ALTO if resultado.rechazar_h0 else COLOR_RIESGO
-        tk.Label(card, text="Prueba de Hipótesis — Hipótesis A",
+        tk.Label(card, text="Prueba de Hipótesis — Hipótesis B (Welch)",
                  font=("Palatino Linotype", 12, "bold"),
                  fg=COLOR_GOLD, bg=BG_CARD, pady=6).pack(anchor="w", padx=10)
-        TablaSimple(card, resultado.tabla()[:-1], bg=BG_CARD).pack(fill="x")
-        # Conclusión resaltada
+
+        if len(prom_trab) < 2 or len(prom_no) < 2:
+            tk.Label(card,
+                     text="⚠ Se necesitan al menos 2 estudiantes en cada grupo.",
+                     font=FONT_SMALL, fg=COLOR_RIESGO, bg=BG_CARD,
+                     padx=10, pady=6).pack(anchor="w")
+            return
+
+        res = prueba_hipotesis_B(prom_trab, prom_no)
+        color_veredicto = COLOR_ALTO if res.rechazar_h0 else COLOR_RIESGO
+
+        TablaSimple(card, res.tabla_prueba()[:-1], bg=BG_CARD).pack(fill="x")
         concl = tk.Frame(card, bg=color_veredicto)
         concl.pack(fill="x", padx=0, pady=2)
-        tk.Label(concl, text=resultado.conclusion,
+        tk.Label(concl, text=res.conclusion,
                  font=("Palatino Linotype", 10, "italic"),
                  fg=BG_MAIN, bg=color_veredicto,
                  wraplength=320, justify="left", padx=8, pady=6).pack()
 
     # ── Gráficas matplotlib ───────────────────────────────────────────
-    def _graficas(self, parent, est, asistencias, promedios):
+    def _graficas(self, parent, est, prom_trab, prom_no, promedios):
         fig = plt.Figure(figsize=(12, 8), facecolor=BG_MAIN)
 
         # 1) Histograma de promedios
         ax1 = fig.add_subplot(2, 2, 1)
         self._hist_promedios(ax1, promedios)
 
-        # 2) Dispersión asistencia vs promedio + recta
+        # 2) Histogramas superpuestos: trabaja vs no trabaja
         ax2 = fig.add_subplot(2, 2, 2)
-        self._scatter_regresion(ax2, asistencias, promedios)
+        self._hist_grupos(ax2, prom_trab, prom_no)
 
         # 3) Boxplot por carrera
         ax3 = fig.add_subplot(2, 2, 3)
@@ -152,19 +187,31 @@ class GrimorioScreen:
         ax.set_ylabel("Frecuencia")
         ax.legend(fontsize=8)
 
-    def _scatter_regresion(self, ax, x, y):
+    def _hist_grupos(self, ax, prom_trab, prom_no):
         ax.set_facecolor(BG_CARD)
-        modelo = ajustar(x, y)
-        xn = np.linspace(min(x), max(x), 100)
-        yn = modelo.beta0 + modelo.beta1 * xn
-        ax.scatter(x, y, color="#9B59B6", s=60, alpha=0.8, zorder=5,
-                   edgecolors=COLOR_BORDER, linewidth=0.5, label="Estudiantes")
-        ax.plot(xn, yn, color=COLOR_GOLD, linewidth=2,
-                label=f"{modelo.ecuacion()}  R²={modelo.r2:.3f}")
-        ax.set_title("Flujo del Destino: Asistencia → Promedio", color=COLOR_GOLD)
-        ax.set_xlabel("Asistencia (%)")
-        ax.set_ylabel("Promedio Final")
-        ax.legend(fontsize=8)
+        bins = np.linspace(
+            min(min(prom_trab, default=0), min(prom_no, default=0)),
+            max(max(prom_trab, default=10), max(prom_no, default=10)),
+            10
+        )
+        if prom_trab:
+            ax.hist(prom_trab, bins=bins, alpha=0.65,
+                    color=COLOR_RIESGO, edgecolor=COLOR_BORDER,
+                    linewidth=0.8, label=f"Trabaja (n={len(prom_trab)})")
+            ax.axvline(np.mean(prom_trab), color=COLOR_RIESGO,
+                       linestyle="--", linewidth=1.5,
+                       label=f"x̄={np.mean(prom_trab):.2f}")
+        if prom_no:
+            ax.hist(prom_no, bins=bins, alpha=0.65,
+                    color=COLOR_ALTO, edgecolor=COLOR_BORDER,
+                    linewidth=0.8, label=f"No trabaja (n={len(prom_no)})")
+            ax.axvline(np.mean(prom_no), color=COLOR_ALTO,
+                       linestyle="--", linewidth=1.5,
+                       label=f"x̄={np.mean(prom_no):.2f}")
+        ax.set_title("Promedio por Situación Laboral", color=COLOR_GOLD)
+        ax.set_xlabel("Promedio Final")
+        ax.set_ylabel("Frecuencia")
+        ax.legend(fontsize=7)
 
     def _boxplot_carrera(self, ax, est):
         ax.set_facecolor(BG_CARD)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""✦ La Profecía — Predicción individual gótica."""
+"""✦ La Profecía — Predicción individual gótica (Hipótesis B)."""
 import tkinter as tk
 from config import (
     BG_MAIN, BG_CARD, BG_SECONDARY,
@@ -73,10 +73,9 @@ class ProphecyScreen:
 
     def _entrenar_y_mostrar(self, e, parent, todos):
         if len(todos) >= 3:
-            self._oraculo.entrenar(
-                [x.porcentaje_asistencia for x in todos],
-                [x.promedio_final for x in todos],
-            )
+            prom_trab = [x.promedio_final for x in todos if     x.trabaja]
+            prom_no   = [x.promedio_final for x in todos if not x.trabaja]
+            self._oraculo.entrenar(prom_trab, prom_no)
         for w in self._result_frame.winfo_children():
             w.destroy()
         self._mostrar_resultado(e)
@@ -84,7 +83,7 @@ class ProphecyScreen:
     def _mostrar_resultado(self, e):
         frame = self._result_frame
         resultado = self._oraculo.predecir(
-            e.porcentaje_asistencia, e.horas_estudio, e.trabaja,
+            e.trabaja, e.horas_estudio,
             seed=hash(e.nombre) % 3,
         )
 
@@ -140,13 +139,14 @@ class ProphecyScreen:
                  font=("Palatino Linotype", 11, "bold"),
                  fg=COLOR_GOLD, bg=BG_CARD, padx=10, pady=6).pack(anchor="w")
         filas = [
-            ("Asistencia (%)",       f"{e.porcentaje_asistencia:.1f} %"),
+            ("Situación laboral",    "Trabaja" if e.trabaja else "No trabaja"),
+            ("Horas trabajo/sem",    f"{e.horas_trabajo} hrs" if e.trabaja else "—"),
             ("Horas de estudio/sem", f"{e.horas_estudio:.0f} hrs"),
+            ("Asistencia (%)",       f"{e.porcentaje_asistencia:.1f} %"),
             ("Promedio actual",      f"{e.promedio_final:.2f}"),
             ("Calificación predicha",f"{resultado.calificacion_predicha:.2f}"),
             ("P(Aprobar)",           f"{resultado.prob_aprobar*100:.1f} %"),
             ("P(Reprobar)",          f"{resultado.prob_reprobar*100:.1f} %"),
-            ("Trabaja",              "Sí" if e.trabaja else "No"),
         ]
         TablaSimple(metrics_card, filas, bg=BG_CARD).pack(fill="x", padx=0)
 

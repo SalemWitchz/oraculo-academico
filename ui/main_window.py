@@ -45,7 +45,7 @@ class MainWindow:
                  font=("Palatino Linotype", 20, "bold"),
                  fg=COLOR_GOLD, bg="#0D0015").pack(side="left", padx=20, pady=10)
         tk.Label(hdr,
-                 text="Sistema de Análisis Estadístico · Hipótesis A · Asistencia → Rendimiento",
+                 text="Sistema de Análisis Estadístico · Hipótesis B · Empleo → Rendimiento",
                  font=("Palatino Linotype", 10, "italic"),
                  fg=COLOR_GOLD_DIM, bg="#0D0015").pack(side="left", padx=4)
 
