@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 ╔══════════════════════════════════════════════════════╗
-║   ORÁCULO GÓTICO ACADÉMICO                          ║
-║   Sistema de Análisis Estadístico — Hipótesis A     ║
+║   SISTEMA DE ANÁLISIS ESTADÍSTICO ACADÉMICO         ║
+║   Hipótesis B — Situación Laboral → Rendimiento     ║
 ║   Probabilidad y Estadística                        ║
 ╚══════════════════════════════════════════════════════╝
 Ejecutar:  python main.py
