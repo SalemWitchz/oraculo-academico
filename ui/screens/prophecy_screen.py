@@ -129,7 +129,7 @@ class ProphecyScreen:
         tk.Label(prof_card,
                  text=f'"{resultado.profecia}"',
                  font=FONT_PROPHECY,
-                 fg="#A09060", bg=BG_CARD,
+                 fg=COLOR_GOLD_DIM, bg=BG_CARD,
                  wraplength=500, justify="left").pack(anchor="w", pady=6)
 
         # Datos del estudiante
@@ -158,5 +158,5 @@ class ProphecyScreen:
                  fg=COLOR_GOLD, bg=BG_CARD).pack(anchor="w", pady=(0, 4))
         for i, rec in enumerate(resultado.recomendaciones, 1):
             tk.Label(rit_card, text=f"  {i}. {rec}",
-                     font=FONT_SMALL, fg="#A09060", bg=BG_CARD,
+                     font=FONT_SMALL, fg=COLOR_GOLD_DIM, bg=BG_CARD,
                      anchor="w", justify="left", wraplength=490).pack(anchor="w", pady=1)

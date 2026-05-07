@@ -97,7 +97,8 @@ class JuicioScreen:
 
         self._lbl_efecto = tk.Label(ctrl, text="",
                                      font=("Palatino Linotype", 10, "italic"),
-                                     fg=COLOR_GOLD_DIM, bg=BG_CARD)
+                                     fg=COLOR_GOLD_DIM, bg=BG_CARD,
+                                     wraplength=600, anchor="w", justify="left")
         self._lbl_efecto.pack(anchor="w", pady=(8, 0))
 
         GothicButton(ctrl, text="⚖  Pronunciar el Juicio",
@@ -129,7 +130,7 @@ class JuicioScreen:
 
         self._lbl_profecia = tk.Label(right, text="",
                                        font=("Palatino Linotype", 12, "italic"),
-                                       fg="#A09060", bg=BG_MAIN,
+                                       fg=COLOR_GOLD_DIM, bg=BG_MAIN,
                                        wraplength=450, justify="left")
         self._lbl_profecia.pack(anchor="w", pady=(0, 8))
 

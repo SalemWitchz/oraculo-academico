@@ -26,7 +26,7 @@ class RitualesScreen:
                  font=("Palatino Linotype", 22, "bold"),
                  fg=COLOR_GOLD, bg=BG_MAIN).pack(pady=(8, 0))
         tk.Label(parent,
-                 text='"Acciones sagradas para cambiar el destino académico"',
+                 text='"Acciones concretas para cambiar el destino académico"',
                  font=("Palatino Linotype", 11, "italic"),
                  fg=COLOR_GOLD_DIM, bg=BG_MAIN).pack(pady=(0, 8))
 
@@ -43,8 +43,8 @@ class RitualesScreen:
         row_res.pack(fill="x")
 
         for nivel, color in [("Alto Rendimiento", COLOR_ALTO),
-                              ("Medio", COLOR_MEDIO),
-                              ("En Riesgo", COLOR_RIESGO)]:
+                              ("Medio",            COLOR_MEDIO),
+                              ("En Riesgo",        COLOR_RIESGO)]:
             f = tk.Frame(row_res, bg=BG_CARD, padx=16)
             f.pack(side="left")
             tk.Label(f, text=str(counts[nivel]),
@@ -62,7 +62,7 @@ class RitualesScreen:
             rb = tk.Radiobutton(fil_frame, text=opcion, variable=self._filtro,
                                 value=opcion, font=FONT_SMALL,
                                 fg=COLOR_GOLD_DIM, bg=BG_CARD,
-                                selectcolor=COLOR_PURPLE, activebackground=BG_CARD,
+                                selectcolor="#252525", activebackground=BG_CARD,
                                 command=lambda: self._refresh_lista(lista_frame, ds))
             rb.pack(side="left", padx=8)
 
@@ -102,7 +102,6 @@ class RitualesScreen:
         card.pack(fill="x", pady=4)
         card.configure(highlightbackground=color, highlightthickness=1)
 
-        # Cabecera
         head = tk.Frame(card, bg=BG_CARD)
         head.pack(fill="x")
         tk.Label(head, text=e.nombre,
@@ -112,7 +111,6 @@ class RitualesScreen:
                  font=("Palatino Linotype", 11, "bold"),
                  fg=color, bg=BG_CARD).pack(side="right")
 
-        # Métricas rápidas
         info = tk.Frame(card, bg=BG_CARD)
         info.pack(fill="x", pady=2)
         items = [
@@ -127,19 +125,18 @@ class RitualesScreen:
             tk.Label(info, text=item, font=FONT_TINY,
                      fg=COLOR_GOLD_DIM, bg=BG_CARD).pack(side="left", padx=6)
 
-        # Rituales
-        recs = gen_recs(e.porcentaje_asistencia, e.horas_estudio, e.trabaja, e.nivel)
+        recs = gen_recs(e.trabaja, e.horas_estudio, e.nivel)
         for i, r in enumerate(recs, 1):
-            icono = "🕯" if e.nivel == "En Riesgo" else "✦"
+            icono = "!" if e.nivel == "En Riesgo" else ">"
             tk.Label(card, text=f"  {icono} {i}. {r}",
                      font=("Palatino Linotype", 10),
-                     fg="#A09060" if e.nivel == "En Riesgo" else COLOR_GOLD_DIM,
+                     fg=COLOR_GOLD_DIM,
                      bg=BG_CARD, anchor="w", justify="left", wraplength=780
                      ).pack(anchor="w", pady=1)
 
     def _exportar(self, ds: DataStore):
         from tkinter import filedialog
-        import csv, datetime
+        import csv
         ruta = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV", "*.csv")],
@@ -152,7 +149,7 @@ class RitualesScreen:
             w.writerow(["Nombre", "Carrera", "Semestre", "Nivel",
                         "Promedio", "Asistencia%", "Ritual 1", "Ritual 2", "Ritual 3"])
             for e in ds.estudiantes:
-                recs = gen_recs(e.porcentaje_asistencia, e.horas_estudio, e.trabaja, e.nivel)
+                recs = gen_recs(e.trabaja, e.horas_estudio, e.nivel)
                 recs += [""] * (3 - len(recs))
                 w.writerow([e.nombre, e.carrera, e.semestre, e.nivel,
                             round(e.promedio_final, 2), e.porcentaje_asistencia] + recs[:3])

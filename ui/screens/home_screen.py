@@ -55,7 +55,7 @@ class HomeScreen:
         tk.Label(hip,
                  text="H₁: Los estudiantes que trabajan tienen un promedio menor a los que no trabajan.  (μ_trabaja < μ_no_trabaja)",
                  font=("Palatino Linotype", 12, "italic"),
-                 fg="#A09060", bg=BG_CARD).pack(anchor="w", pady=(4, 0))
+                 fg=COLOR_GOLD_DIM, bg=BG_CARD).pack(anchor="w", pady=(4, 0))
         tk.Label(hip,
                  text="H₀: μ_trabaja ≥ μ_no_trabaja   (trabajar no reduce el promedio)",
                  font=("Palatino Linotype", 11),

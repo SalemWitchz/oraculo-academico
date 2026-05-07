@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
-"""Paleta gótica y constantes globales."""
+"""Paleta monocromática — blanco, negro y escala de grises."""
 
-# ── Colores ──────────────────────────────────────────────────────────────────
-BG_MAIN      = "#0A0008"
-BG_SECONDARY = "#0F0018"
-BG_CARD      = "#130020"
-BG_SIDEBAR   = "#0D0015"
-BG_INPUT     = "#0F0018"
+# ── Fondos ────────────────────────────────────────────────────────────────────
+BG_MAIN      = "#0A0A0A"
+BG_SECONDARY = "#111111"
+BG_CARD      = "#1A1A1A"
+BG_SIDEBAR   = "#0C0C0C"
+BG_INPUT     = "#141414"
 
-COLOR_GOLD        = "#C9A96E"
-COLOR_GOLD_BRIGHT = "#F0C070"
-COLOR_GOLD_DIM    = "#7A6040"
-COLOR_PURPLE      = "#4A0E6E"
-COLOR_PURPLE_LT   = "#6B21A8"
-COLOR_RED         = "#8B0000"
-COLOR_RED_LT      = "#C0392B"
-COLOR_BORDER      = "#3D1C5E"
+# ── Texto / Interactivos ──────────────────────────────────────────────────────
+COLOR_GOLD        = "#F0F0F0"   # texto principal → blanco suave
+COLOR_GOLD_BRIGHT = "#FFFFFF"   # énfasis → blanco puro
+COLOR_GOLD_DIM    = "#999999"   # texto secundario → gris medio
+COLOR_PURPLE      = "#252525"   # bg botón normal → gris oscuro
+COLOR_PURPLE_LT   = "#383838"   # bg botón hover  → gris claro
+COLOR_RED         = "#F0F0F0"   # btn accent bg   → blanco (invertido)
+COLOR_RED_LT      = "#CCCCCC"   # btn accent hover
+COLOR_BORDER      = "#2E2E2E"   # bordes → gris muy oscuro
+COLOR_BORDER_LT   = "#555555"   # bordes resaltados
 
-COLOR_ALTO   = "#4CAF50"
-COLOR_MEDIO  = "#FF9800"
-COLOR_RIESGO = "#F44336"
+# ── Estado académico (mantener legibilidad funcional) ─────────────────────────
+COLOR_ALTO   = "#EEEEEE"    # alto rendimiento  → blanco/gris claro
+COLOR_MEDIO  = "#888888"    # nivel medio       → gris medio
+COLOR_RIESGO = "#DD3322"    # en riesgo         → rojo oscuro (alerta)
 
 # ── Tipografía ────────────────────────────────────────────────────────────────
 _SERIF = "Palatino Linotype"
@@ -53,7 +56,7 @@ MATERIAS  = ["Probabilidad y Estadística", "Cálculo Diferencial",
              "Álgebra Lineal", "Programación", "Bases de Datos"]
 SEMESTRES = list(range(1, 10))
 
-# ── Matplotlib gótico ─────────────────────────────────────────────────────────
+# ── Matplotlib monocromático ──────────────────────────────────────────────────
 MPL_STYLE = {
     "figure.facecolor":       BG_MAIN,
     "figure.edgecolor":       COLOR_BORDER,
@@ -70,8 +73,8 @@ MPL_STYLE = {
     "ytick.color":            COLOR_GOLD_DIM,
     "xtick.labelsize":        9,
     "ytick.labelsize":        9,
-    "grid.color":             "#2A1040",
-    "grid.alpha":             0.5,
+    "grid.color":             "#252525",
+    "grid.alpha":             0.6,
     "grid.linestyle":         "--",
     "text.color":             COLOR_GOLD,
     "legend.facecolor":       BG_CARD,

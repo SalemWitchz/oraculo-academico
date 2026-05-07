@@ -9,7 +9,7 @@ from config import (
     FONT_BODY, FONT_SMALL, FONT_TINY, CARRERAS, MATERIAS, SEMESTRES,
 )
 from data.data_store import DataStore
-from data.csv_importer import importar, exportar
+from data.csv_importer import importar, exportar, get_diagnostico
 from data.estudiante import Estudiante
 from data.sample_generator import generar_datos_muestra
 from ui.widgets import GothicCard, GothicButton, color_nivel
@@ -81,14 +81,53 @@ class DataEntryScreen:
             return
         try:
             nuevos = importar(ruta)
+            diag = get_diagnostico()
             if not nuevos:
-                messagebox.showwarning("Oráculo", "El archivo no contiene filas válidas.")
+                self._mostrar_diagnostico(diag, exito=False)
                 return
             ds.set_estudiantes(nuevos)
             self._actualizar_tabla(ds)
-            messagebox.showinfo("Oráculo", f"Se cargaron {len(nuevos)} almas correctamente.")
+            self._mostrar_diagnostico(diag, exito=True, n=len(nuevos))
         except Exception as ex:
             messagebox.showerror("Error del oráculo", str(ex))
+
+    def _mostrar_diagnostico(self, diag: dict, exito: bool, n: int = 0):
+        mapeadas = diag.get("columnas_mapeadas", {})
+        sin_mapear = diag.get("columnas_sin_mapear", [])
+        errores = diag.get("errores", [])
+        encoding = diag.get("encoding", "?")
+
+        lineas = []
+        if exito:
+            lineas.append(f"✓ {n} almas cargadas correctamente (encoding: {encoding})\n")
+        else:
+            lineas.append("✗ No se encontraron filas válidas.\n")
+
+        lineas.append("── Columnas detectadas y mapeadas ──")
+        if mapeadas:
+            for col, campo in mapeadas.items():
+                lineas.append(f"  '{col}'  →  {campo}")
+        else:
+            lineas.append("  (ninguna)")
+
+        if sin_mapear:
+            ignoradas = [c for c in sin_mapear if c.lower() not in ("marca temporal", "timestamp", "")]
+            if ignoradas:
+                lineas.append("\n── Columnas NO reconocidas (ignoradas) ──")
+                for c in ignoradas:
+                    lineas.append(f"  '{c}'")
+                lineas.append(
+                    "\nSi alguna columna importante no fue reconocida, "
+                    "comunica el nombre exacto para agregarlo al mapeador."
+                )
+
+        if errores:
+            lineas.append(f"\n── Filas con error ({len(errores)}) ──")
+            for e in errores[:5]:
+                lineas.append(f"  {e}")
+
+        titulo = "Importación exitosa" if exito else "Sin datos válidos"
+        messagebox.showinfo(titulo, "\n".join(lineas))
 
     def _cargar_muestra(self, parent, ds: DataStore):
         ds.set_estudiantes(generar_datos_muestra())
@@ -205,7 +244,7 @@ class DataEntryScreen:
                         fieldbackground=BG_CARD, rowheight=22,
                         font=("Palatino Linotype", 10))
         style.configure("Gothic.Treeview.Heading",
-                        background="#150025", foreground=COLOR_GOLD,
+                        background="#111111", foreground=COLOR_GOLD,
                         font=("Palatino Linotype", 10, "bold"), relief="flat")
         style.map("Gothic.Treeview",
                   background=[("selected", COLOR_PURPLE)],

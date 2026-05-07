@@ -110,7 +110,7 @@ class GrimorioScreen:
         ]
 
         for i, fila in enumerate(filas):
-            bg = BG_CARD if i % 2 == 0 else "#12001E"
+            bg = BG_CARD if i % 2 == 0 else "#111111"
             row = tk.Frame(card, bg=bg)
             row.pack(fill="x")
             widths = [22, 12, 12]
