@@ -75,7 +75,6 @@ class MainWindow:
         tk.Label(self._sidebar, text="NAVEGACIÓN",
                  font=("Palatino Linotype", 8, "bold"),
                  fg=COLOR_BORDER_LT, bg=BG_SIDEBAR,
-                 letter_spacing=2 if hasattr(tk.Label, "letter_spacing") else 0,
                  ).pack(pady=(16, 6))
 
         nav = [
