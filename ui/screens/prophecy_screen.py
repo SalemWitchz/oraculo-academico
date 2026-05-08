@@ -2,8 +2,8 @@
 """✦ La Profecía — Predicción individual gótica (Hipótesis B)."""
 import tkinter as tk
 from config import (
-    BG_MAIN, BG_CARD, BG_SECONDARY,
-    COLOR_GOLD, COLOR_GOLD_DIM, COLOR_GOLD_BRIGHT, COLOR_BORDER,
+    BG_MAIN, BG_CARD, BG_SECONDARY, BG_INPUT,
+    COLOR_GOLD, COLOR_GOLD_DIM, COLOR_GOLD_BRIGHT, COLOR_BORDER, COLOR_BORDER_LT,
     COLOR_ALTO, COLOR_MEDIO, COLOR_RIESGO, COLOR_PURPLE, COLOR_PURPLE_LT,
     FONT_BODY, FONT_SMALL, FONT_TINY, FONT_PROPHECY,
 )
@@ -18,11 +18,16 @@ class ProphecyScreen:
         self.win = win
         self._oraculo = Oraculo()
         self._result_frame: tk.Frame | None = None
+        self._listbox:       tk.Listbox | None = None
+        self._search_var:    tk.StringVar | None = None
+        self._filtrados:     list = []
+        self._todos:         list = []
 
     def render(self, parent: tk.Frame):
         parent.configure(bg=BG_MAIN)
         ds = DataStore.get()
         estudiantes = ds.estudiantes
+        self._todos = list(estudiantes)
 
         # ── Encabezado ────────────────────────────────────────────────
         tk.Label(parent, text="", bg=BG_MAIN).pack(pady=4)
@@ -33,23 +38,62 @@ class ProphecyScreen:
                  text='"El oráculo lee tu destino académico en las sombras de los datos"',
                  font=FONT_PROPHECY, fg=COLOR_GOLD_DIM, bg=BG_MAIN).pack(pady=(2, 10))
 
-        # ── Selector de estudiante ─────────────────────────────────────
+        # ── Selector con búsqueda ──────────────────────────────────────
         sel_card = GothicCard(parent, padx=20, pady=12)
         sel_card.pack(padx=30, fill="x")
 
-        tk.Label(sel_card, text="Selecciona al consultante del oráculo:",
+        tk.Label(sel_card, text="Buscar consultante del oráculo:",
                  font=FONT_BODY, fg=COLOR_GOLD, bg=BG_CARD).pack(anchor="w")
 
-        nombres = [str(e) for e in estudiantes] if estudiantes else ["(sin datos)"]
-        self._var = tk.StringVar(value=nombres[0])
-        opt = tk.OptionMenu(sel_card, self._var, *nombres)
-        opt.config(font=FONT_BODY, bg=BG_SECONDARY, fg=COLOR_GOLD,
-                   activebackground=COLOR_PURPLE, activeforeground=COLOR_GOLD,
-                   relief="flat", bd=0, highlightthickness=0)
-        opt["menu"].config(bg=BG_SECONDARY, fg=COLOR_GOLD, font=FONT_SMALL,
-                           activebackground=COLOR_PURPLE)
-        opt.pack(fill="x", pady=6)
+        # Barra de búsqueda
+        search_row = tk.Frame(sel_card, bg=BG_CARD)
+        search_row.pack(fill="x", pady=(4, 2))
 
+        self._search_var = tk.StringVar()
+        entry = tk.Entry(search_row, textvariable=self._search_var,
+                         font=FONT_BODY, bg=BG_INPUT, fg=COLOR_GOLD,
+                         insertbackground=COLOR_GOLD,
+                         relief="flat", bd=0,
+                         highlightbackground=COLOR_BORDER,
+                         highlightcolor=COLOR_BORDER_LT,
+                         highlightthickness=1)
+        entry.pack(side="left", fill="x", expand=True, ipady=5, padx=(0, 6))
+
+        tk.Label(search_row, text="nombre o matrícula",
+                 font=("Palatino Linotype", 9, "italic"),
+                 fg=COLOR_BORDER_LT, bg=BG_CARD).pack(side="left")
+
+        # Lista de resultados
+        list_frame = tk.Frame(sel_card, bg=BG_CARD,
+                              highlightbackground=COLOR_BORDER,
+                              highlightthickness=1)
+        list_frame.pack(fill="x", pady=(0, 4))
+
+        self._listbox = tk.Listbox(
+            list_frame,
+            font=FONT_SMALL,
+            bg=BG_SECONDARY, fg=COLOR_GOLD,
+            selectbackground=COLOR_PURPLE, selectforeground=COLOR_GOLD,
+            activestyle="none",
+            height=6, relief="flat", bd=0,
+            highlightthickness=0,
+        )
+        vsb = tk.Scrollbar(list_frame, orient="vertical",
+                           command=self._listbox.yview,
+                           bg=BG_CARD, troughcolor=BG_SECONDARY)
+        self._listbox.configure(yscrollcommand=vsb.set)
+        self._listbox.pack(side="left", fill="x", expand=True)
+        vsb.pack(side="right", fill="y")
+
+        # Selección al hacer clic
+        self._listbox.bind("<<ListboxSelect>>",
+                           lambda e: self._al_seleccionar(parent, estudiantes))
+
+        # Filtrado en tiempo real
+        self._search_var.trace_add("write",
+                                   lambda *_: self._filtrar(parent, estudiantes))
+
+        # Botón de consulta
         GothicButton(sel_card, text="✦  Consultar el Oráculo",
                      accent=True,
                      command=lambda: self._predecir(parent, estudiantes)
@@ -59,14 +103,54 @@ class ProphecyScreen:
         self._result_frame = tk.Frame(parent, bg=BG_MAIN)
         self._result_frame.pack(fill="both", expand=True, padx=30, pady=8)
 
-        # Si hay datos, mostrar el primero automáticamente
+        # Poblar lista inicial y mostrar el primero
+        self._poblar_lista(estudiantes)
         if estudiantes:
+            self._listbox.selection_set(0)
             self._entrenar_y_mostrar(estudiantes[0], parent, estudiantes)
+
+    # ── Búsqueda y selección ──────────────────────────────────────────
+    def _poblar_lista(self, estudiantes):
+        self._filtrados = list(estudiantes)
+        if self._listbox is None:
+            return
+        self._listbox.delete(0, "end")
+        for e in self._filtrados:
+            self._listbox.insert("end", f"  {e.nombre}  [{e.id}]")
+
+    def _filtrar(self, parent, estudiantes):
+        if self._listbox is None or self._search_var is None:
+            return
+        q = self._search_var.get().strip().lower()
+        self._filtrados = [
+            e for e in estudiantes
+            if not q or q in e.nombre.lower() or q in e.id.lower()
+        ]
+        self._listbox.delete(0, "end")
+        for e in self._filtrados:
+            self._listbox.insert("end", f"  {e.nombre}  [{e.id}]")
+        if self._filtrados:
+            self._listbox.selection_set(0)
+
+    def _al_seleccionar(self, parent, estudiantes):
+        e = self._get_seleccionado()
+        if e:
+            self._entrenar_y_mostrar(e, parent, estudiantes)
+
+    def _get_seleccionado(self):
+        if self._listbox is None:
+            return None
+        sel = self._listbox.curselection()
+        if not sel or not self._filtrados:
+            return None
+        idx = sel[0]
+        return self._filtrados[idx] if idx < len(self._filtrados) else None
 
     # ── Lógica ────────────────────────────────────────────────────────
     def _predecir(self, parent, estudiantes):
-        nombre_sel = self._var.get()
-        e = next((x for x in estudiantes if str(x) == nombre_sel), None)
+        e = self._get_seleccionado()
+        if e is None and self._filtrados:
+            e = self._filtrados[0]
         if e is None:
             return
         self._entrenar_y_mostrar(e, parent, estudiantes)

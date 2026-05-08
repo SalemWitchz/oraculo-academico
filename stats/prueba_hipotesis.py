@@ -4,7 +4,8 @@
 H₀: μ_trabaja ≥ μ_no_trabaja   (trabajar no reduce el promedio)
 H₁: μ_trabaja < μ_no_trabaja   (los que trabajan tienen promedio MENOR)
 
-Prueba t de Welch para dos muestras independientes, una cola izquierda.
+Prueba t de Student para dos muestras independientes, una cola izquierda.
+Asume varianzas iguales; usa varianza combinada (pooled variance).
 """
 import numpy as np
 from scipy import stats as sp_stats
@@ -43,17 +44,17 @@ class ResultadoPruebaB:
 
     def tabla_prueba(self) -> list[tuple[str, str]]:
         return [
-            ("Hipótesis nula H₀",         self.hipotesis_nula),
-            ("Hipótesis alternativa H₁",  self.hipotesis_alt),
-            ("Diferencia (μ₁ − μ₂)",      f"{self.diferencia:.4f}"),
-            ("Estadístico t (Welch)",      f"{self.t_estadistico:.4f}"),
-            ("Grados de libertad",         f"{self.grados_libertad:.2f}"),
-            ("p-valor (una cola)",         f"{self.p_valor:.4f}"),
-            ("Nivel de significancia α",   str(self.alpha)),
-            ("¿Rechazar H₀?",             "SÍ ✓" if self.rechazar_h0 else "NO ✗"),
-            ("IC 95% diferencia",         f"[{self.ic_dif_inf:.4f}, {self.ic_dif_sup:.4f}]"),
-            ("d de Cohen (tamaño efecto)",f"{self.d_cohen:.4f}"),
-            ("Conclusión",                self.conclusion),
+            ("Hipótesis nula H₀",          self.hipotesis_nula),
+            ("Hipótesis alternativa H₁",   self.hipotesis_alt),
+            ("Diferencia (μ₁ − μ₂)",       f"{self.diferencia:.4f}"),
+            ("Estadístico t (Student)",     f"{self.t_estadistico:.4f}"),
+            ("Grados de libertad",          f"{self.grados_libertad:.0f}"),
+            ("p-valor (una cola)",          f"{self.p_valor:.4f}"),
+            ("Nivel de significancia α",    str(self.alpha)),
+            ("¿Rechazar H₀?",              "SÍ ✓" if self.rechazar_h0 else "NO ✗"),
+            ("IC 95% diferencia",          f"[{self.ic_dif_inf:.4f}, {self.ic_dif_sup:.4f}]"),
+            ("d de Cohen (tamaño efecto)", f"{self.d_cohen:.4f}"),
+            ("Conclusión",                 self.conclusion),
         ]
 
 
@@ -62,7 +63,7 @@ def prueba_hipotesis_B(
     promedios_no_trabaja: list[float],
     alpha: float = 0.05,
 ) -> ResultadoPruebaB:
-    """Prueba t de Welch unilateral izquierda para Hipótesis B."""
+    """Prueba t de Student unilateral izquierda para Hipótesis B (varianzas iguales)."""
     g1 = np.array(promedios_trabaja,    dtype=float)
     g2 = np.array(promedios_no_trabaja, dtype=float)
 
@@ -70,22 +71,23 @@ def prueba_hipotesis_B(
     m1, m2 = g1.mean(), g2.mean()
     s1, s2 = g1.std(ddof=1), g2.std(ddof=1)
 
-    # t de Welch, alternative='less' → H₁: mean(g1) < mean(g2)
-    t_stat, p_val = sp_stats.ttest_ind(g1, g2, equal_var=False, alternative="less")
+    # t de Student (varianzas iguales), alternative='less' → H₁: mean(g1) < mean(g2)
+    t_stat, p_val = sp_stats.ttest_ind(g1, g2, equal_var=True, alternative="less")
 
-    # Grados de libertad de Welch-Satterthwaite
-    v1, v2 = s1**2 / n1, s2**2 / n2
-    gl = (v1 + v2)**2 / (v1**2 / (n1 - 1) + v2**2 / (n2 - 1))
+    # Grados de libertad de Student: n1 + n2 - 2
+    gl = float(n1 + n2 - 2)
+
+    # Varianza combinada (pooled variance) y error estándar
+    sp_pool = np.sqrt(((n1 - 1) * s1**2 + (n2 - 1) * s2**2) / (n1 + n2 - 2))
+    se = sp_pool * np.sqrt(1.0 / n1 + 1.0 / n2)
 
     # IC 95% para la diferencia de medias (bilateral)
-    se = np.sqrt(v1 + v2)
     t_crit = sp_stats.t.ppf(0.975, df=gl)
     dif = m1 - m2
     ic_inf, ic_sup = dif - t_crit * se, dif + t_crit * se
 
     # d de Cohen (pooled std)
-    sp = np.sqrt(((n1 - 1) * s1**2 + (n2 - 1) * s2**2) / (n1 + n2 - 2))
-    d_cohen = dif / sp if sp > 0 else 0.0
+    d_cohen = dif / sp_pool if sp_pool > 0 else 0.0
 
     rechazar = bool(p_val < alpha)
     if rechazar:

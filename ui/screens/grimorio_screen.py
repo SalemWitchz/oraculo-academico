@@ -6,6 +6,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from scipy.stats import norm as _norm
 
 from config import (
     BG_MAIN, BG_CARD, COLOR_GOLD, COLOR_GOLD_DIM, COLOR_BORDER,
@@ -43,9 +44,18 @@ class GrimorioScreen:
         inner = scroll.inner
 
         # ── Título ────────────────────────────────────────────────────
-        tk.Label(inner, text="✧  EL GRIMORIO DE DATOS  ✧",
+        hdr_row = tk.Frame(inner, bg=BG_MAIN)
+        hdr_row.pack(fill="x", padx=18, pady=(8, 0))
+
+        tk.Label(hdr_row, text="✧  EL GRIMORIO DE DATOS  ✧",
                  font=("Palatino Linotype", 20, "bold"),
-                 fg=COLOR_GOLD, bg=BG_MAIN).pack(pady=(8, 0))
+                 fg=COLOR_GOLD, bg=BG_MAIN).pack(side="left")
+
+        from ui.widgets import GothicButton
+        GothicButton(hdr_row, text="⤓  Exportar PDF",
+                     command=lambda: self._exportar_pdf(parent)).pack(
+            side="right", padx=4)
+
         tk.Label(inner,
                  text='"Aquí yacen los secretos estadísticos del destino académico"',
                  font=("Palatino Linotype", 11, "italic"),
@@ -130,7 +140,7 @@ class GrimorioScreen:
     def _tabla_hipotesis_B(self, parent, prom_trab, prom_no):
         card = GothicCard(parent, padx=0, pady=0)
         card.pack(side="left", fill="both", expand=True, padx=6, pady=4)
-        tk.Label(card, text="Prueba de Hipótesis — Hipótesis B (Welch)",
+        tk.Label(card, text="Prueba de Hipótesis — Hipótesis B (Student)",
                  font=("Palatino Linotype", 12, "bold"),
                  fg=COLOR_GOLD, bg=BG_CARD, pady=6).pack(anchor="w", padx=10)
 
@@ -182,41 +192,51 @@ class GrimorioScreen:
 
     def _hist_promedios(self, ax, promedios):
         ax.set_facecolor(BG_CARD)
+        mu  = np.mean(promedios)
+        sig = np.std(promedios, ddof=1)
         ax.hist(promedios, bins=8, color=COLOR_PURPLE_LT,
-                edgecolor=COLOR_BORDER, linewidth=0.8, alpha=0.9)
-        ax.axvline(np.mean(promedios), color=COLOR_GOLD, linestyle="--",
-                   linewidth=1.5, label=f"Media={np.mean(promedios):.2f}")
+                edgecolor=COLOR_BORDER, linewidth=0.8, alpha=0.9, density=True)
+        x_rng = np.linspace(mu - 4 * sig, mu + 4 * sig, 300)
+        ax.plot(x_rng, _norm.pdf(x_rng, mu, sig),
+                color=COLOR_GOLD, linewidth=2,
+                label=f"N(μ={mu:.2f}, σ={sig:.2f})")
+        ax.axvline(mu, color=COLOR_GOLD, linestyle="--",
+                   linewidth=1.5, label=f"Media={mu:.2f}")
         ax.axvline(np.median(promedios), color=COLOR_RIESGO, linestyle=":",
                    linewidth=1.5, label=f"Mediana={np.median(promedios):.2f}")
-        ax.set_title("Distribución de Promedios", color=COLOR_GOLD)
+        ax.set_title("Distribución de Promedios (densidad, área=1)", color=COLOR_GOLD)
         ax.set_xlabel("Promedio Final")
-        ax.set_ylabel("Frecuencia")
-        ax.legend(fontsize=8)
+        ax.set_ylabel("Densidad de probabilidad")
+        ax.legend(fontsize=7)
 
     def _hist_grupos(self, ax, prom_trab, prom_no):
         ax.set_facecolor(BG_CARD)
-        bins = np.linspace(
-            min(min(prom_trab, default=0), min(prom_no, default=0)),
-            max(max(prom_trab, default=10), max(prom_no, default=10)),
-            10
-        )
+        lo = min(min(prom_trab, default=0), min(prom_no, default=0))
+        hi = max(max(prom_trab, default=10), max(prom_no, default=10))
+        bins = np.linspace(lo, hi, 10)
+        x_rng = np.linspace(lo - 1, hi + 1, 300)
         if prom_trab:
-            ax.hist(prom_trab, bins=bins, alpha=0.65,
+            mu1, sig1 = np.mean(prom_trab), np.std(prom_trab, ddof=1)
+            ax.hist(prom_trab, bins=bins, alpha=0.55, density=True,
                     color=COLOR_RIESGO, edgecolor=COLOR_BORDER,
                     linewidth=0.8, label=f"Trabaja (n={len(prom_trab)})")
-            ax.axvline(np.mean(prom_trab), color=COLOR_RIESGO,
-                       linestyle="--", linewidth=1.5,
-                       label=f"x̄={np.mean(prom_trab):.2f}")
+            ax.plot(x_rng, _norm.pdf(x_rng, mu1, sig1),
+                    color=COLOR_RIESGO, linewidth=2)
+            ax.axvline(mu1, color=COLOR_RIESGO, linestyle="--", linewidth=1.5,
+                       label=f"x̄={mu1:.2f}")
         if prom_no:
-            ax.hist(prom_no, bins=bins, alpha=0.65,
+            mu2, sig2 = np.mean(prom_no), np.std(prom_no, ddof=1)
+            ax.hist(prom_no, bins=bins, alpha=0.55, density=True,
                     color=COLOR_ALTO, edgecolor=COLOR_BORDER,
                     linewidth=0.8, label=f"No trabaja (n={len(prom_no)})")
+            ax.plot(x_rng, _norm.pdf(x_rng, mu2, sig2),
+                    color=COLOR_ALTO, linewidth=2)
             ax.axvline(np.mean(prom_no), color=COLOR_ALTO,
                        linestyle="--", linewidth=1.5,
                        label=f"x̄={np.mean(prom_no):.2f}")
-        ax.set_title("Promedio por Situación Laboral", color=COLOR_GOLD)
+        ax.set_title("Promedio por Situación Laboral (densidad, área=1)", color=COLOR_GOLD)
         ax.set_xlabel("Promedio Final")
-        ax.set_ylabel("Frecuencia")
+        ax.set_ylabel("Densidad de probabilidad")
         ax.legend(fontsize=7)
 
     def _boxplot_carrera(self, ax, est):
@@ -360,3 +380,24 @@ class GrimorioScreen:
         ax.set_ylabel("Promedio Final")
         ax.set_ylim(0, 11)
         ax.tick_params(axis="x", labelsize=8)
+
+    # ── Exportar PDF ──────────────────────────────────────────────────
+    def _exportar_pdf(self, parent):
+        import tkinter.filedialog as fd
+        import tkinter.messagebox as mb
+        from stats.exportar_pdf import generar_reporte
+
+        ruta = fd.asksaveasfilename(
+            title="Guardar reporte PDF",
+            defaultextension=".pdf",
+            filetypes=[("PDF", "*.pdf"), ("Todos", "*.*")],
+            initialfile="Reporte_Estadistico.pdf",
+        )
+        if not ruta:
+            return
+        try:
+            generar_reporte(ruta)
+            mb.showinfo("PDF generado",
+                        f"Reporte guardado exitosamente en:\n{ruta}")
+        except Exception as exc:
+            mb.showerror("Error al exportar PDF", str(exc))

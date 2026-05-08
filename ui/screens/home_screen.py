@@ -80,7 +80,7 @@ class HomeScreen:
                  font=("Palatino Linotype", 11),
                  fg=COLOR_GOLD_DIM, bg=BG_CARD).pack(anchor="w", pady=(2, 0))
         tk.Label(hip,
-                 text="Método: Prueba t de Welch para dos muestras independientes · Una cola izquierda · α = 0.05",
+                 text="Método: Prueba t de Student para dos muestras independientes (varianzas iguales) · Una cola izquierda · α = 0.05",
                  font=("Palatino Linotype", 10),
                  fg=COLOR_BORDER, bg=BG_CARD).pack(anchor="w", pady=(2, 0))
 

@@ -66,13 +66,14 @@ _SECCIONES = [
              "La tabla 'Comparación de Grupos' muestra n, media y desviación estándar "
              "separados entre estudiantes que trabajan y los que no trabajan."),
             ("Prueba de Hipótesis B",
-             "Muestra el resultado de la prueba t de Welch: estadístico t, grados de libertad, "
-             "p-valor (una cola), IC 95% de la diferencia, d de Cohen y conclusión."),
+             "Muestra el resultado de la prueba t de Student: estadístico t, grados de libertad "
+             "(n₁+n₂−2), p-valor (una cola), IC 95% de la diferencia, d de Cohen y conclusión."),
             ("Gráficas",
              "4 gráficas: distribución de promedios, histogramas superpuestos por grupo laboral, "
              "boxplots por carrera y pastel de niveles académicos."),
         ],
-        "tip": "Si p-valor < 0.05 aparece la conclusión en verde (se rechaza H₀). "
+        "tip": "La prueba t de Student asume varianzas iguales entre grupos. "
+               "Si p-valor < 0.05 aparece la conclusión en verde (se rechaza H₀). "
                "Si p-valor ≥ 0.05 aparece en rojo (no hay evidencia suficiente).",
     },
     {
@@ -123,9 +124,10 @@ _SECCIONES = [
             ("Hipótesis alternativa (H₁)",
              "H₁: μ_trabaja < μ_no_trabaja — Los que trabajan tienen promedio MENOR. "
              "Es lo que queremos demostrar con evidencia estadística."),
-            ("Prueba t de Welch (una cola izquierda)",
-             "Se usa cuando las varianzas de los grupos pueden ser diferentes. "
-             "alternative='less' evalúa si el grupo 1 (trabaja) tiene media menor que el grupo 2."),
+            ("Prueba t de Student (una cola izquierda)",
+             "Se asume que las varianzas de ambos grupos son iguales (varianza combinada pooled). "
+             "alternative='less' evalúa si el grupo 1 (trabaja) tiene media menor que el grupo 2. "
+             "Grados de libertad: n₁ + n₂ − 2."),
             ("p-valor",
              "Si p < α (0.05): hay evidencia estadística para RECHAZAR H₀ → los que trabajan "
              "tienen promedio significativamente menor. "

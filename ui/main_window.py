@@ -78,13 +78,15 @@ class MainWindow:
                  ).pack(pady=(16, 6))
 
         nav = [
-            ("⌂  Inicio",          "home"),
-            ("⊕  Datos",           "datos"),
-            ("✦  La Profecía",     "profecia"),
-            ("✧  El Grimorio",     "grimorio"),
-            ("⚖  El Juicio Final", "juicio"),
-            ("☽  Los Rituales",    "rituales"),
-            ("?  Guía de Uso",     "guia"),
+            ("⌂  Inicio",              "home"),
+            ("⊕  Datos",               "datos"),
+            ("✦  La Profecía",         "profecia"),
+            ("✧  El Grimorio",         "grimorio"),
+            ("∑  Grimorio Avanzado",   "grimorio_avanzado"),
+            ("⚖  El Juicio Final",     "juicio"),
+            ("☽  Los Rituales",        "rituales"),
+            ("?  Guía de Uso",         "guia"),
+            ("☆  Créditos",            "creditos"),
         ]
         for label, key in nav:
             btn = tk.Button(
@@ -127,21 +129,25 @@ class MainWindow:
 
     # ── Pantallas ─────────────────────────────────────────────────────
     def _lazy_init_screens(self):
-        from ui.screens.home_screen     import HomeScreen
-        from ui.screens.data_entry      import DataEntryScreen
-        from ui.screens.prophecy_screen import ProphecyScreen
-        from ui.screens.grimorio_screen import GrimorioScreen
-        from ui.screens.juicio_screen   import JuicioScreen
-        from ui.screens.rituales_screen import RitualesScreen
-        from ui.screens.guia_screen     import GuiaScreen
+        from ui.screens.home_screen              import HomeScreen
+        from ui.screens.data_entry               import DataEntryScreen
+        from ui.screens.prophecy_screen          import ProphecyScreen
+        from ui.screens.grimorio_screen          import GrimorioScreen
+        from ui.screens.grimorio_avanzado_screen import GrimorioAvanzadoScreen
+        from ui.screens.juicio_screen            import JuicioScreen
+        from ui.screens.rituales_screen          import RitualesScreen
+        from ui.screens.guia_screen              import GuiaScreen
+        from ui.screens.creditos_screen          import CreditosScreen
         self._screens = {
-            "home":     HomeScreen(self),
-            "datos":    DataEntryScreen(self),
-            "profecia": ProphecyScreen(self),
-            "grimorio": GrimorioScreen(self),
-            "juicio":   JuicioScreen(self),
-            "rituales": RitualesScreen(self),
-            "guia":     GuiaScreen(self),
+            "home":              HomeScreen(self),
+            "datos":             DataEntryScreen(self),
+            "profecia":          ProphecyScreen(self),
+            "grimorio":          GrimorioScreen(self),
+            "grimorio_avanzado": GrimorioAvanzadoScreen(self),
+            "juicio":            JuicioScreen(self),
+            "rituales":          RitualesScreen(self),
+            "guia":              GuiaScreen(self),
+            "creditos":          CreditosScreen(self),
         }
 
     def show(self, key: str):
