@@ -17,13 +17,37 @@ _EQUIPO = [
 ]
 
 _INFO = {
-    "Institución":  "Instituto Tecnológico",
-    "Carrera":      "Ingeniería en Desarrollo y Tecnologías de Software",
-    "Materia":      "Probabilidad y Estadística",
-    "Grado y grupo":"4° \"O\"",
-    "Docente":      "Ing. Víctor Sol Hernández",
+    "Institución":   "Universidad Autónoma de Chiapas (UNACH)",
+    "Carrera":       "Ingeniería en Desarrollo y Tecnologías de Software",
+    "Materia":       "Probabilidad y Estadística",
+    "Grado y grupo": "4° \"O\"",
+    "Docente":       "Ing. Víctor Sol Hernández",
     "Ciclo escolar": "2024 – 2025",
 }
+
+_REFERENCIAS = [
+    ("Walpole, R. E., Myers, R. H., & Myers, S. L. (2012).",
+     "Probabilidad y estadística para ingeniería y ciencias (9.ª ed.). Pearson Educación."),
+    ("Montgomery, D. C., & Runger, G. C. (2018).",
+     "Applied statistics and probability for engineers (7th ed.). Wiley."),
+    ("Devore, J. L. (2016).",
+     "Probability and statistics for engineering and the sciences (9th ed.). Cengage Learning."),
+    ("Anderson, D. R., Sweeney, D. J., & Williams, T. A. (2019).",
+     "Estadística para negocios y economía (13.ª ed.). Cengage Learning."),
+    ("Harris, C. R., Millman, K. J., van der Walt, S. J., et al. (2020).",
+     "Array programming with NumPy. Nature, 585, 357–362. https://doi.org/10.1038/s41586-020-2649-2"),
+    ("Virtanen, P., Gommers, R., Oliphant, T. E., et al. (2020).",
+     "SciPy 1.0: Fundamental algorithms for scientific computing in Python. "
+     "Nature Methods, 17, 261–272. https://doi.org/10.1038/s41592-020-0772-5"),
+    ("Hunter, J. D. (2007).",
+     "Matplotlib: A 2D graphics environment. Computing in Science & Engineering, 9(3), 90–95. "
+     "https://doi.org/10.1109/MCSE.2007.55"),
+    ("Python Software Foundation. (2024).",
+     "Python (Versión 3.x) [Software]. https://www.python.org"),
+    ("McKinney, W. (2010).",
+     "Data structures for statistical computing in Python. Proceedings of the 9th Python in "
+     "Science Conference, 51–56. https://doi.org/10.25080/Majora-92bf1922-00a"),
+]
 
 
 class CreditosScreen:
@@ -53,20 +77,21 @@ class CreditosScreen:
         # ── Equipo ────────────────────────────────────────────────────
         self._seccion_equipo(inner)
 
-        # ── Pie decorativo ────────────────────────────────────────────
+        # ── Referencias ───────────────────────────────────────────────
         tk.Label(inner, text="─── ◆ ◆ ◆ ───",
                  font=("Palatino Linotype", 13),
                  fg=COLOR_BORDER_LT, bg=BG_MAIN).pack(pady=(20, 4))
+        self._seccion_referencias(inner)
+
+        # ── Pie ───────────────────────────────────────────────────────
         tk.Label(inner,
-                 text="Desarrollado con Python · Tkinter · Matplotlib · SciPy · NumPy",
-                 font=("Palatino Linotype", 10, "italic"),
-                 fg=COLOR_BORDER_LT, bg=BG_MAIN).pack(pady=(0, 4))
+                 text="Desarrollado con Python · Tkinter · Matplotlib · SciPy · NumPy · pandas",
+                 font=("Palatino Linotype", 9, "italic"),
+                 fg=COLOR_BORDER_LT, bg=BG_MAIN).pack(pady=(12, 2))
         tk.Label(inner,
-                 text="Todos los métodos estadísticos siguen la notación y procedimientos\n"
-                      "de la bibliografía oficial del plan de estudios.",
-                 font=("Palatino Linotype", 10, "italic"),
-                 fg=COLOR_GOLD_DIM, bg=BG_MAIN,
-                 justify="center").pack(pady=(2, 20))
+                 text="Universidad Autónoma de Chiapas (UNACH)  ·  2024–2025",
+                 font=("Palatino Linotype", 9, "italic"),
+                 fg=COLOR_BORDER_LT, bg=BG_MAIN).pack(pady=(0, 20))
 
     # ── Sub-secciones ─────────────────────────────────────────────────
     def _seccion_info(self, parent):
@@ -92,6 +117,40 @@ class CreditosScreen:
                      font=("Palatino Linotype", 11),
                      fg=COLOR_GOLD, bg=bg,
                      anchor="w", padx=8).pack(side="left")
+
+    def _seccion_referencias(self, parent):
+        tk.Label(parent, text="REFERENCIAS  (formato APA 7.ª edición)",
+                 font=("Palatino Linotype", 13, "bold"),
+                 fg=COLOR_GOLD_DIM, bg=BG_MAIN).pack(pady=(4, 10))
+
+        card = GothicCard(parent, padx=0, pady=0)
+        card.pack(fill="x", padx=60, pady=(0, 8))
+
+        for i, (autor, titulo) in enumerate(_REFERENCIAS):
+            bg = BG_CARD if i % 2 == 0 else BG_SECONDARY
+            row = tk.Frame(card, bg=bg, padx=16, pady=8)
+            row.pack(fill="x")
+
+            # Número de referencia
+            tk.Label(row, text=f"[{i + 1}]",
+                     font=("Palatino Linotype", 10, "bold"),
+                     fg=COLOR_BORDER_LT, bg=bg,
+                     width=4, anchor="nw").pack(side="left", anchor="n")
+
+            # Bloque autor + título con sangría francesa
+            bloque = tk.Frame(row, bg=bg)
+            bloque.pack(side="left", fill="x", expand=True)
+
+            tk.Label(bloque, text=autor,
+                     font=("Palatino Linotype", 10, "bold"),
+                     fg=COLOR_GOLD, bg=bg,
+                     anchor="w", justify="left",
+                     wraplength=820).pack(anchor="w")
+            tk.Label(bloque, text="      " + titulo,
+                     font=("Palatino Linotype", 10),
+                     fg=COLOR_GOLD_DIM, bg=bg,
+                     anchor="w", justify="left",
+                     wraplength=820).pack(anchor="w")
 
     def _seccion_equipo(self, parent):
         tk.Label(parent, text="EQUIPO DE TRABAJO",
