@@ -69,6 +69,12 @@ class GrimorioScreen:
 
         self._graficas(inner, est, prom_trab, prom_no, promedios)
 
+        # Extended charts — only when CSV extended fields are present
+        if any(e.nivel_estres for e in est):
+            SectionTitle(inner, "Estadísticas Ampliadas — Datos del Formulario", bg=BG_MAIN
+                         ).pack(anchor="w", padx=18, pady=(10, 4))
+            self._graficas_extendidas(inner, est)
+
         tk.Label(inner, text="", bg=BG_MAIN).pack(pady=10)
 
     # ── Secciones ─────────────────────────────────────────────────────
@@ -250,3 +256,107 @@ class GrimorioScreen:
                   fontsize=8, framealpha=0.2)
         ax.set_facecolor(BG_CARD)
         ax.set_title("Clasificación de Destinos", color=COLOR_GOLD)
+
+    # ── Gráficas ampliadas (datos formulario) ─────────────────────────
+    def _graficas_extendidas(self, parent, est):
+        fig = plt.Figure(figsize=(12, 8), facecolor=BG_MAIN)
+
+        ax1 = fig.add_subplot(2, 2, 1)
+        self._bar_estres(ax1, est)
+
+        ax2 = fig.add_subplot(2, 2, 2)
+        self._bar_frecuencia(ax2, est)
+
+        ax3 = fig.add_subplot(2, 2, 3)
+        self._bar_genero(ax3, est)
+
+        ax4 = fig.add_subplot(2, 2, 4)
+        self._bar_estilo(ax4, est)
+
+        fig.tight_layout(pad=3)
+        canvas_frame = tk.Frame(parent, bg=BG_MAIN)
+        canvas_frame.pack(fill="x", padx=16, pady=4)
+        canvas = FigureCanvasTkAgg(fig, master=canvas_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def _bar_estres(self, ax, est):
+        ax.set_facecolor(BG_CARD)
+        cats = ["Alto", "Medio", "Bajo"]
+        colors = [COLOR_RIESGO, COLOR_MEDIO, COLOR_ALTO]
+        means, ns = [], []
+        for cat in cats:
+            g = [e.promedio_final for e in est
+                 if e.nivel_estres.strip().capitalize() == cat]
+            means.append(np.mean(g) if g else 0)
+            ns.append(len(g))
+        bars = ax.bar(cats, means, color=colors,
+                      edgecolor=COLOR_BORDER, linewidth=0.8, alpha=0.85)
+        for bar, n, m in zip(bars, ns, means):
+            if n:
+                ax.text(bar.get_x() + bar.get_width() / 2, m + 0.1,
+                        f"n={n}\n{m:.2f}", ha="center", va="bottom",
+                        color=COLOR_GOLD_DIM, fontsize=8)
+        ax.set_title("Nivel de Estrés vs Promedio", color=COLOR_GOLD)
+        ax.set_ylabel("Promedio Final")
+        ax.set_ylim(0, 11)
+
+    def _bar_frecuencia(self, ax, est):
+        ax.set_facecolor(BG_CARD)
+        cats = ["Siempre", "Frecuentemente", "A veces", "Nunca"]
+        means, ns = [], []
+        for cat in cats:
+            g = [e.promedio_final for e in est
+                 if e.frecuencia_estudio.strip().lower() == cat.lower()]
+            means.append(np.mean(g) if g else 0)
+            ns.append(len(g))
+        bars = ax.bar(cats, means, color=COLOR_PURPLE_LT,
+                      edgecolor=COLOR_BORDER, linewidth=0.8, alpha=0.85)
+        for bar, n, m in zip(bars, ns, means):
+            if n:
+                ax.text(bar.get_x() + bar.get_width() / 2, m + 0.1,
+                        f"n={n}\n{m:.2f}", ha="center", va="bottom",
+                        color=COLOR_GOLD_DIM, fontsize=8)
+        ax.set_title("Frecuencia de Estudio vs Promedio", color=COLOR_GOLD)
+        ax.set_ylabel("Promedio Final")
+        ax.set_ylim(0, 11)
+        ax.tick_params(axis="x", labelsize=8)
+
+    def _bar_genero(self, ax, est):
+        ax.set_facecolor(BG_CARD)
+        generos = sorted(set(e.genero for e in est if e.genero))
+        means, ns = [], []
+        for g in generos:
+            grupo = [e.promedio_final for e in est if e.genero == g]
+            means.append(np.mean(grupo) if grupo else 0)
+            ns.append(len(grupo))
+        bars = ax.bar(generos, means, color=COLOR_GOLD_DIM,
+                      edgecolor=COLOR_BORDER, linewidth=0.8, alpha=0.85)
+        for bar, n, m in zip(bars, ns, means):
+            if n:
+                ax.text(bar.get_x() + bar.get_width() / 2, m + 0.1,
+                        f"n={n}\n{m:.2f}", ha="center", va="bottom",
+                        color=BG_MAIN, fontsize=8)
+        ax.set_title("Género vs Promedio Final", color=COLOR_GOLD)
+        ax.set_ylabel("Promedio Final")
+        ax.set_ylim(0, 11)
+
+    def _bar_estilo(self, ax, est):
+        ax.set_facecolor(BG_CARD)
+        estilos = sorted(set(e.estilo_aprendizaje for e in est if e.estilo_aprendizaje))
+        means, ns = [], []
+        for s in estilos:
+            g = [e.promedio_final for e in est if e.estilo_aprendizaje == s]
+            means.append(np.mean(g) if g else 0)
+            ns.append(len(g))
+        bars = ax.bar(estilos, means, color=COLOR_ALTO,
+                      edgecolor=COLOR_BORDER, linewidth=0.8, alpha=0.85)
+        for bar, n, m in zip(bars, ns, means):
+            if n:
+                ax.text(bar.get_x() + bar.get_width() / 2, m + 0.1,
+                        f"n={n}\n{m:.2f}", ha="center", va="bottom",
+                        color=BG_MAIN, fontsize=8)
+        ax.set_title("Estilo de Aprendizaje vs Promedio", color=COLOR_GOLD)
+        ax.set_ylabel("Promedio Final")
+        ax.set_ylim(0, 11)
+        ax.tick_params(axis="x", labelsize=8)
