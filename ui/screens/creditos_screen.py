@@ -22,7 +22,6 @@ _INFO = {
     "Materia":       "Probabilidad y Estadística",
     "Grado y grupo": "4° \"O\"",
     "Docente":       "Ing. Víctor Sol Hernández",
-    "Ciclo escolar": "2024 – 2025",
 }
 
 _REFERENCIAS = [
