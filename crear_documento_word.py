@@ -174,11 +174,11 @@ def agregar_seccion_requisitos(doc):
     add_heading(doc, "2.5.2  Validación e Inferencia", level=3)
     items_inf = [
         ("Correlación:", "Pearson entre horas de estudio y promedio final — implementado en "
-         "Grimorio Avanzado (Sección III) y stats/regresion_lineal.py."),
+         "stats/regresion_lineal.py como parte de la regresión lineal."),
         ("Inferencia:", "Intervalos de confianza al 95% (stats/descriptiva.py) y prueba "
          "t de Student con varianza combinada pooled (stats/prueba_hipotesis.py)."),
         ("Predicción:", "Regresión lineal simple por mínimos cuadrados (β₀, β₁, R²) "
-         "implementada en stats/regresion_lineal.py y documentada en Grimorio Avanzado Sección IV."),
+         "implementada en stats/regresion_lineal.py y documentada en Grimorio Avanzado Sección III."),
     ]
     for bold, txt in items_inf:
         add_bullet(doc, txt, bold_prefix=bold)
@@ -355,43 +355,11 @@ METODOS = [
         "Z = (x̄ − μ₀) / (σ/√n)",
     ),
     (
-        "Prueba F",
-        "Implícita en el análisis de varianza entre carreras (boxplot_carrera)",
-        "La comparación de varianzas entre grupos de carreras en el boxplot usa el concepto "
-        "de la distribución F. El Grimorio Avanzado documenta la varianza combinada sp² "
-        "que es la base de la distribución F.",
-        "F = s₁²/s₂²   con gl₁ = n₁−1,  gl₂ = n₂−1",
-    ),
-    (
-        "Prueba ji-cuadrada (χ²)",
-        "Prueba de bondad de ajuste e independencia — referenciada teóricamente",
-        "El sistema clasifica estudiantes en niveles (Alto/Medio/Riesgo) y grupos (trabaja/no trabaja). "
-        "La prueba χ² permitiría contrastar si la distribución de niveles es independiente "
-        "de la situación laboral. La fórmula y concepto se explican en Grimorio Avanzado.",
-        "χ² = Σ[(O − E)² / E]",
-    ),
-    (
-        "ANOVA (análisis de varianza)",
-        "Comparación de promedios por carrera — boxplot_carrera en Grimorio",
-        "El boxplot por carrera muestra la variabilidad dentro y entre grupos de carreras, "
-        "que es la base del ANOVA de un factor. Se comparan k medias (una por carrera) "
-        "usando la misma lógica de varianza total = varianza entre grupos + varianza intra-grupos.",
-        "F = MSG/MSE   donde MSG = SS_between/(k−1),  MSE = SS_within/(N−k)",
-    ),
-    (
         "Regresión lineal simple",
         "Módulo stats/regresion_lineal.py y Grimorio Avanzado — Sección IV",
         "Se implementó la regresión lineal simple entre horas de estudio (x) y promedio final (y) "
         "mediante mínimos cuadrados. El Grimorio Avanzado muestra β₀, β₁ y R² con valores reales.",
         "ŷ = β₀ + β₁x   donde β₁ = Σ(xᵢ−x̄)(yᵢ−ȳ)/Σ(xᵢ−x̄)²   β₀ = ȳ − β₁x̄",
-    ),
-    (
-        "Correlación de Pearson",
-        "Grimorio Avanzado — Sección III",
-        "Se calcula la correlación de Pearson entre promedio final y horas de estudio semanales. "
-        "El Grimorio Avanzado muestra numerador, denominador y sustitución con datos reales. "
-        "También se usa implícitamente en el modelo de predicción del Oráculo.",
-        "r = Σ[(xᵢ−x̄)(yᵢ−ȳ)] / √[Σ(xᵢ−x̄)² · Σ(yᵢ−ȳ)²]",
     ),
     (
         "Método de mínimos cuadrados",
@@ -467,22 +435,6 @@ METODOS = [
         "f(t) = [Γ((ν+1)/2) / (√(νπ)·Γ(ν/2))] · (1+t²/ν)^(−(ν+1)/2)",
     ),
     (
-        "Distribución F",
-        "Implícita en la comparación de varianzas — base del ANOVA entre carreras",
-        "La distribución F aparece al comparar las varianzas de múltiples grupos de carreras. "
-        "El boxplot por carrera visualiza esta comparación; el Grimorio Avanzado referencia "
-        "la razón F = s₁²/s₂² como medida de homogeneidad de varianzas.",
-        "X ~ F(d₁, d₂)   donde d₁ = gl₁,  d₂ = gl₂",
-    ),
-    (
-        "Distribución ji-cuadrada",
-        "Prueba de bondad de ajuste — referenciada en Grimorio Avanzado",
-        "La distribución χ² es base para probar si la distribución de niveles académicos "
-        "(Alto/Medio/Riesgo) sigue una distribución esperada, y para la prueba de "
-        "independencia entre nivel y situación laboral.",
-        "χ² = Σ (Oᵢ − Eᵢ)² / Eᵢ   ~  χ²_(k−1)",
-    ),
-    (
         "Teorema de Bayes",
         "stats/modelo_prediccion.py — actualización de probabilidades según situación laboral",
         "El Oráculo usa la probabilidad condicional de aprobar dado que el estudiante trabaja "
@@ -513,14 +465,6 @@ METODOS = [
         "promedio alto Y asistencia alta. La probabilidad de ambas condiciones simultáneas "
         "se calcula multiplicando probabilidades condicionales.",
         "P(A∩B) = P(A|B)·P(B)   (eventos dependientes)",
-    ),
-    (
-        "Prueba de bondad de ajuste",
-        "stats/exportar_pdf.py + Grimorio Avanzado — Shapiro-Wilk como prueba de normalidad",
-        "Se implementa la prueba de Shapiro-Wilk (scipy.stats.shapiro) para verificar si "
-        "los promedios siguen una distribución normal. W y p-valor se muestran en el "
-        "Grimorio Avanzado con interpretación automática.",
-        "H₀: los datos siguen distribución normal   rechazar si p < 0.05",
     ),
     (
         "Prueba de independencia χ²",
@@ -636,30 +580,6 @@ METODOS = [
         "S = nº de diferencias positivas   ~  Binomial(n, 0.5) bajo H₀",
     ),
     (
-        "Mann-Whitney",
-        "Alternativa no paramétrica a la prueba t — comparación de grupos laborales",
-        "Mann-Whitney U es la versión no paramétrica de la prueba t de Student para "
-        "dos muestras independientes. Es la alternativa cuando no se cumple normalidad. "
-        "El sistema incluye la prueba Shapiro-Wilk para verificar cuándo aplicar Mann-Whitney.",
-        "U = nº de veces que xᵢ > yⱼ para todos los pares (i,j)",
-    ),
-    (
-        "Kruskal-Wallis",
-        "Alternativa no paramétrica al ANOVA — comparación de k grupos (carreras)",
-        "Kruskal-Wallis es el equivalente no paramétrico del ANOVA de un factor. "
-        "El sistema compara k grupos de carreras mediante boxplots; si no se cumple "
-        "normalidad, Kruskal-Wallis es la prueba adecuada.",
-        "H = (12/N(N+1)) Σ(Rⱼ²/nⱼ) − 3(N+1)   ~  χ²_(k−1)",
-    ),
-    (
-        "Kolmogorov-Smirnov",
-        "Prueba de bondad de ajuste — complementa la prueba Shapiro-Wilk",
-        "El sistema usa Shapiro-Wilk para muestras n ≤ 5000; para n > 5000 se "
-        "referencia Kolmogorov-Smirnov como alternativa. K-S compara la distribución "
-        "empírica de los datos contra la distribución normal teórica.",
-        "D = sup|Fₙ(x) − F₀(x)|",
-    ),
-    (
         "Árboles de decisión",
         "stats/modelo_prediccion.py — lógica de clasificación y recomendaciones",
         "La clasificación de estudiantes en niveles (Alto/Medio/Riesgo) y la "
@@ -716,15 +636,6 @@ METODOS = [
         "Se muestra en la tabla del Grimorio y en el Grimorio Avanzado con su interpretación: "
         "si p < 0.05, se rechaza H₀; la conclusión se colorea verde o rojo según el resultado.",
         "p = P(T < t_obs | H₀ verdadera)   rechazar H₀ si p < α",
-    ),
-    (
-        "Estimación conjunta de varianza (pooled variance)",
-        "stats/prueba_hipotesis.py — variable sp_pool y Grimorio Avanzado Sección II",
-        "La varianza combinada (pooled) se calcula como promedio ponderado de las "
-        "varianzas de ambos grupos. Es el supuesto fundamental de la prueba t de Student "
-        "(equal_var=True). El Grimorio Avanzado muestra numerador, denominador y "
-        "resultado con los datos reales.",
-        "sp² = [(n₁−1)s₁² + (n₂−1)s₂²] / (n₁+n₂−2)",
     ),
 ]
 
@@ -850,7 +761,7 @@ def crear_documento():
     # ── Métodos estadísticos ──────────────────────────────────────────
     add_heading(doc, "4. Cumplimiento de Requisitos por Método Estadístico", level=1)
     add_para(doc,
-             "A continuación se detalla, para cada uno de los 48 métodos estadísticos requeridos, "
+             "A continuación se detalla, para cada uno de los 38 métodos estadísticos requeridos, "
              "cómo fue implementado o referenciado en el sistema.")
     doc.add_paragraph()
 
@@ -881,6 +792,6 @@ def crear_documento():
 
 if __name__ == "__main__":
     doc  = crear_documento()
-    ruta = r"c:\Users\PC PRIDE WHITE WHALE\Downloads\EJ26\Cumplimiento_Requisitos_Estadistica.docx"
+    ruta = r"c:\Users\PC PRIDE WHITE WHALE\Downloads\EJ26\Cumplimiento_Requisitos_Estadistica_v2.docx"
     doc.save(ruta)
     print(f"Documento creado: {ruta}")

@@ -60,7 +60,6 @@ class GrimorioAvanzadoScreen:
         SectionTitle(inner, "II. Prueba t de Student — Hipótesis B (Situación Laboral)", bg=BG_MAIN
                      ).pack(anchor="w", padx=18, pady=(14, 2))
         if len(prom_trab) >= 2 and len(prom_no) >= 2:
-            self._paso_pooled(inner, prom_trab, prom_no)
             self._paso_t_student(inner, prom_trab, prom_no)
             self._paso_cohen(inner, prom_trab, prom_no)
             self._paso_ic_diferencia(inner, prom_trab, prom_no)
@@ -69,20 +68,10 @@ class GrimorioAvanzadoScreen:
                      text="⚠ Se necesitan al menos 2 estudiantes en cada grupo (trabaja / no trabaja).",
                      font=FONT_SMALL, fg=COLOR_RIESGO, bg=BG_MAIN, padx=20).pack(anchor="w")
 
-        # ── III. Correlación de Pearson ────────────────────────────────
-        SectionTitle(inner, "III. Correlación de Pearson — Promedio vs Horas de Estudio", bg=BG_MAIN
-                     ).pack(anchor="w", padx=18, pady=(14, 2))
-        self._paso_pearson(inner, promedios, horas_est)
-
-        # ── IV. Regresión Lineal Simple ────────────────────────────────
-        SectionTitle(inner, "IV. Regresión Lineal Simple (Mínimos Cuadrados) — Promedio vs Horas", bg=BG_MAIN
+        # ── III. Regresión Lineal Simple ───────────────────────────────
+        SectionTitle(inner, "III. Regresión Lineal Simple (Mínimos Cuadrados) — Promedio vs Horas de Estudio", bg=BG_MAIN
                      ).pack(anchor="w", padx=18, pady=(14, 2))
         self._paso_regresion(inner, promedios, horas_est)
-
-        # ── V. Distribución Normal ────────────────────────────────────
-        SectionTitle(inner, "V. Distribución Normal — Verificación de Normalidad", bg=BG_MAIN
-                     ).pack(anchor="w", padx=18, pady=(14, 2))
-        self._paso_normalidad(inner, promedios)
 
         tk.Label(inner, text="", bg=BG_MAIN).pack(pady=10)
 
@@ -224,34 +213,6 @@ class GrimorioAvanzadoScreen:
     # ══════════════════════════════════════════════════════════════════
     # Pasos — Prueba t de Student
     # ══════════════════════════════════════════════════════════════════
-    def _paso_pooled(self, parent, g1, g2):
-        a1, a2 = np.array(g1, dtype=float), np.array(g2, dtype=float)
-        n1, n2 = len(a1), len(a2)
-        s1, s2 = float(a1.std(ddof=1)), float(a2.std(ddof=1))
-        sp2 = ((n1 - 1) * s1**2 + (n2 - 1) * s2**2) / (n1 + n2 - 2)
-        sp  = np.sqrt(sp2)
-
-        body = self._card(parent, "Varianza Combinada (Pooled Variance) — Estimación Conjunta de Varianza", "sp")
-        self._fila(body, "Fórmula:",
-                   "sp²  =  [(n₁−1)·s₁²  +  (n₂−1)·s₂²]  /  (n₁+n₂−2)")
-        self._fila(body, "Grupo 1 (trabaja):",
-                   f"n₁ = {n1},   x̄₁ = {a1.mean():.4f},   s₁ = {s1:.4f},   s₁² = {s1**2:.4f}")
-        self._fila(body, "Grupo 2 (no trab.):",
-                   f"n₂ = {n2},   x̄₂ = {a2.mean():.4f},   s₂ = {s2:.4f},   s₂² = {s2**2:.4f}")
-        num = (n1 - 1) * s1**2 + (n2 - 1) * s2**2
-        den = n1 + n2 - 2
-        self._fila(body, "Numerador:",
-                   f"({n1}−1)×{s1**2:.4f}  +  ({n2}−1)×{s2**2:.4f}  "
-                   f"=  {(n1-1)*s1**2:.4f}  +  {(n2-1)*s2**2:.4f}  =  {num:.4f}")
-        self._fila(body, "Denominador:",
-                   f"n₁+n₂−2  =  {n1}+{n2}−2  =  {den}")
-        self._fila(body, "sp²:",
-                   f"{num:.4f}  /  {den}  =  {sp2:.4f}")
-        self._fila(body, "sp  =  √sp²:",
-                   f"√{sp2:.4f}  =  {sp:.4f}")
-        self._resultado(body,
-                        f"sp  =  {sp:.4f}   (desviación estándar combinada de ambos grupos)")
-
     def _paso_t_student(self, parent, g1, g2):
         a1, a2 = np.array(g1, dtype=float), np.array(g2, dtype=float)
         n1, n2 = len(a1), len(a2)
@@ -357,42 +318,8 @@ class GrimorioAvanzadoScreen:
         self._resultado(body, f"IC₉₅%(μ₁−μ₂)  =  [{inf:.4f},  {sup:.4f}]")
 
     # ══════════════════════════════════════════════════════════════════
-    # Pasos — Correlación y Regresión
+    # Pasos — Regresión
     # ══════════════════════════════════════════════════════════════════
-    def _paso_pearson(self, parent, prom, horas):
-        x   = np.array(horas, dtype=float)
-        y   = np.array(prom,  dtype=float)
-        n   = len(x)
-        xm  = float(x.mean())
-        ym  = float(y.mean())
-        num = float(np.sum((x - xm) * (y - ym)))
-        dx  = float(np.sqrt(np.sum((x - xm)**2)))
-        dy  = float(np.sqrt(np.sum((y - ym)**2)))
-        r   = num / (dx * dy) if dx * dy != 0 else 0.0
-        fuerza = ("muy débil"  if abs(r) < 0.2 else
-                  "débil"      if abs(r) < 0.4 else
-                  "moderada"   if abs(r) < 0.6 else
-                  "fuerte"     if abs(r) < 0.8 else "muy fuerte")
-        dire = "positiva" if r >= 0 else "negativa"
-
-        body = self._card(parent,
-                          "Correlación de Pearson (r) — Relación Lineal entre Promedio y Horas de Estudio", "r")
-        self._fila(body, "Fórmula:",
-                   "r  =  Σ[(xᵢ−x̄)(yᵢ−ȳ)]  /  √[Σ(xᵢ−x̄)² · Σ(yᵢ−ȳ)²]")
-        self._fila(body, "Variable x:", f"Horas de estudio semanales   →   x̄ = {xm:.4f}")
-        self._fila(body, "Variable y:", f"Promedio final               →   ȳ = {ym:.4f}")
-        self._fila(body, "n (pares):", str(n))
-        self._fila(body, "Numerador  Σ(x−x̄)(y−ȳ):", f"{num:.4f}")
-        self._fila(body, "√Σ(xᵢ−x̄)²:", f"{dx:.4f}")
-        self._fila(body, "√Σ(yᵢ−ȳ)²:", f"{dy:.4f}")
-        self._fila(body, "Denominador:", f"{dx:.4f} × {dy:.4f}  =  {dx*dy:.4f}")
-        self._fila(body, "Sustitución:",
-                   f"r  =  {num:.4f}  /  {dx*dy:.4f}")
-        self._fila(body, "Escala Pearson:",
-                   "|r| < 0.2 = muy débil   0.2–0.4 = débil   0.4–0.6 = moderada   0.6–0.8 = fuerte   > 0.8 = muy fuerte")
-        self._resultado(body,
-                        f"r  =  {r:.4f}   →  Correlación {fuerza} {dire}")
-
     def _paso_regresion(self, parent, prom, horas):
         x   = np.array(horas, dtype=float)
         y   = np.array(prom,  dtype=float)
@@ -433,44 +360,3 @@ class GrimorioAvanzadoScreen:
         self._resultado(body,
                         f"ŷ  =  {b0:.4f}  +  {b1:.4f}·x     R²  =  {r2:.4f}")
 
-    # ══════════════════════════════════════════════════════════════════
-    # Paso — Distribución Normal / Normalidad
-    # ══════════════════════════════════════════════════════════════════
-    def _paso_normalidad(self, parent, datos):
-        x      = np.array(datos, dtype=float)
-        n      = len(x)
-        mu     = float(x.mean())
-        sigma  = float(x.std(ddof=1))
-        sesgo  = float(sp_stats.skew(x))
-        kurt   = float(sp_stats.kurtosis(x))
-        stat_sw, p_sw = sp_stats.shapiro(x) if n <= 5000 else (float("nan"), float("nan"))
-
-        body = self._card(parent,
-                          "Distribución Normal — Parámetros y Prueba de Normalidad (Shapiro-Wilk)", "N")
-        self._fila(body, "Distribución Normal:",
-                   "f(x)  =  (1 / σ√2π) · e^[−(x−μ)²/(2σ²)]    (área total = 1)")
-        self._fila(body, "Parámetro μ (media):", f"{mu:.4f}")
-        self._fila(body, "Parámetro σ (desv.):", f"{sigma:.4f}")
-        self._fila(body, "Rango 68% de datos:",
-                   f"[μ−σ, μ+σ]  =  [{mu-sigma:.4f},  {mu+sigma:.4f}]")
-        self._fila(body, "Rango 95% de datos:",
-                   f"[μ−2σ, μ+2σ]  =  [{mu-2*sigma:.4f},  {mu+2*sigma:.4f}]")
-        self._fila(body, "Rango 99.7% de datos:",
-                   f"[μ−3σ, μ+3σ]  =  [{mu-3*sigma:.4f},  {mu+3*sigma:.4f}]")
-        self._fila(body, "Sesgo (skewness):",
-                   f"{sesgo:.4f}   {'≈ simétrica (buena normalidad)' if abs(sesgo) < 0.5 else 'distribución asimétrica'}")
-        self._fila(body, "Curtosis (excess):",
-                   f"{kurt:.4f}   {'≈ normal (mesocúrtica)' if abs(kurt) < 1 else 'distribución con colas diferente a normal'}")
-        if not np.isnan(stat_sw):
-            self._fila(body, "Prueba Shapiro-Wilk:",
-                       f"W = {stat_sw:.4f},   p = {p_sw:.4f}")
-            normal = p_sw >= 0.05
-            concl  = ("p ≥ 0.05 → NO se rechaza normalidad  (los datos son consistentes con distribución normal)"
-                      if normal else
-                      "p < 0.05 → se rechaza normalidad  (los datos no siguen exactamente una distribución normal)")
-            self._fila(body, "Conclusión:", concl)
-            self._resultado(body,
-                            f"N({mu:.4f}, {sigma:.4f}²)   —   "
-                            f"{'Normalidad aceptada (p={:.4f})'.format(p_sw) if normal else 'Normalidad rechazada (p={:.4f})'.format(p_sw)}")
-        else:
-            self._resultado(body, f"N({mu:.4f}, {sigma:.4f}²)   —   n > 5000, usar Kolmogorov-Smirnov")
