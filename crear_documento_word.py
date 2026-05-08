@@ -38,6 +38,240 @@ def add_para(doc, text, bold=False, italic=False, size=11, indent=False):
     run.font.size = Pt(size)
     return p
 
+def add_bullet(doc, text, bold_prefix=None, indent_cm=1.0):
+    """Párrafo con viñeta manual y prefijo en negrita opcional."""
+    p = doc.add_paragraph()
+    p.paragraph_format.left_indent = Cm(indent_cm)
+    if bold_prefix:
+        r = p.add_run(bold_prefix + " ")
+        r.font.bold = True
+        r.font.size = Pt(11)
+    r2 = p.add_run(text)
+    r2.font.size = Pt(11)
+    return p
+
+def add_colored_box(doc, titulo, lineas, color_hex="1A1A2E", text_color=(200, 200, 220)):
+    """Tabla de 1 celda que simula un recuadro de color con título y lista."""
+    tbl = doc.add_table(rows=1, cols=1)
+    tbl.style = "Table Grid"
+    cell = tbl.cell(0, 0)
+    set_cell_bg(cell, color_hex)
+    p_title = cell.paragraphs[0]
+    r = p_title.add_run(titulo)
+    r.font.bold = True
+    r.font.size = Pt(11)
+    r.font.color.rgb = RGBColor(*text_color)
+    for linea in lineas:
+        p_l = cell.add_paragraph()
+        rl  = p_l.add_run("    • " + linea)
+        rl.font.size = Pt(10)
+        rl.font.color.rgb = RGBColor(210, 210, 230)
+    doc.add_paragraph()
+
+def agregar_seccion_requisitos(doc):
+    """Agrega la sección 2 con las especificaciones oficiales del proyecto."""
+
+    add_heading(doc, "2. Especificaciones Oficiales del Proyecto", level=1)
+
+    # Título y unidad
+    p_tit = doc.add_paragraph()
+    r_t   = p_tit.add_run("Sistema de Análisis Estadístico para la Evaluación Académica")
+    r_t.font.bold = True
+    r_t.font.size = Pt(13)
+
+    p_uni = doc.add_paragraph()
+    r_u   = p_uni.add_run("Unidad de Competencia: ")
+    r_u.font.bold = True
+    r_u.font.size = Pt(11)
+    p_uni.add_run("Probabilidad y Estadística").font.size = Pt(11)
+
+    doc.add_paragraph()
+
+    # ── Objetivo ──────────────────────────────────────────────────────
+    add_heading(doc, "2.1  Objetivo del Proyecto", level=2)
+    add_para(doc,
+             "Diseñar e implementar un software que permita analizar el rendimiento académico "
+             "de los estudiantes, identificando patrones, factores de influencia y riesgos para "
+             "apoyar la toma de decisiones institucionales fundamentadas en datos.")
+
+    # ── Problema ──────────────────────────────────────────────────────
+    add_heading(doc, "2.2  Problema a Resolver", level=2)
+    for item in [
+        "Falta de detección temprana de riesgo académico.",
+        "Desconocimiento de los factores que impactan el rendimiento.",
+        "Decisiones institucionales sin sustento estadístico.",
+    ]:
+        add_bullet(doc, item, "•")
+
+    # ── Validación estadística ─────────────────────────────────────────
+    add_heading(doc, "2.3  Validación Estadística — Opción B: Empleo (seleccionada)", level=2)
+    add_para(doc,
+             "El proyecto seleccionó la Opción B para su validación estadística mediante "
+             "pruebas de inferencia:")
+
+    tbl_h = doc.add_table(rows=4, cols=2)
+    tbl_h.style = "Table Grid"
+    encabezados = [("Opción", "Hipótesis"), ("A — Asistencia", "H₁: El porcentaje de asistencia influye positivamente en el promedio final."),
+                   ("B — Empleo  ✓ (seleccionada)", "H₁: Los estudiantes que trabajan tienen un promedio menor a los que no trabajan."),
+                   ("C — Plataformas", "H₁: Existe correlación positiva entre el uso de plataformas y el rendimiento.")]
+    for r_idx, (col0, col1) in enumerate(encabezados):
+        cells = tbl_h.rows[r_idx].cells
+        cells[0].text = col0
+        cells[1].text = col1
+        if r_idx == 0:
+            for c in cells:
+                set_cell_bg(c, "1A1A2E")
+                c.paragraphs[0].runs[0].font.bold      = True
+                c.paragraphs[0].runs[0].font.color.rgb = RGBColor(220, 220, 255)
+        elif r_idx == 2:
+            for c in cells:
+                set_cell_bg(c, "0D3B0D")
+                c.paragraphs[0].runs[0].font.color.rgb = RGBColor(150, 255, 150)
+    doc.add_paragraph()
+
+    add_para(doc,
+             "La hipótesis se validó con la Prueba t de Student para dos muestras independientes "
+             "(α = 0.05, una cola izquierda), comparando el promedio final del grupo que trabaja "
+             "vs. el grupo que no trabaja.")
+
+    # ── Arquitectura de datos ─────────────────────────────────────────
+    add_heading(doc, "2.4  Arquitectura de Datos del Sistema", level=2)
+
+    add_heading(doc, "2.4.1  Captura de Variables", level=3)
+    for item in [
+        "Calificaciones por parcial (P1, P2, P3) y promedio final ponderado.",
+        "Asistencia (porcentaje 0–100) y horas de estudio semanales.",
+        "Uso de plataformas (horas diarias) y situación laboral (trabaja / no trabaja).",
+        "Campos extendidos del formulario: género, nivel de estrés, estilo de aprendizaje, "
+        "frecuencia de estudio, dificultades principales.",
+    ]:
+        add_bullet(doc, item, "•")
+
+    add_heading(doc, "2.4.2  Procesamiento Técnico", level=3)
+    for item in [
+        "Limpieza de inconsistencias y valores nulos (csv_importer.py — validación de rangos).",
+        "Normalización de datos: rangos textuales convertidos a numéricos "
+        "('1 a 2 horas' → 1.5, etc.).",
+        "Agrupación por Carrera, Semestre y Materia en las visualizaciones del Grimorio.",
+    ]:
+        add_bullet(doc, item, "•")
+
+    # ── Núcleo de análisis ────────────────────────────────────────────
+    add_heading(doc, "2.5  Núcleo de Análisis Estadístico", level=2)
+
+    add_heading(doc, "2.5.1  Estadística y Probabilidad", level=3)
+    items_desc = [
+        ("Descriptiva:", "Media, mediana, moda, varianza, desviación estándar, coeficiente "
+         "de variación, sesgo, curtosis, IQR, mínimo y máximo — implementados en stats/descriptiva.py."),
+        ("Distribuciones:", "Análisis de sesgo en calificaciones; histogramas con distribución "
+         "normal superpuesta (density=True, área=1); prueba de normalidad Shapiro-Wilk."),
+        ("Modelos:", "Probabilidad de reprobación vs. alto rendimiento calculada en "
+         "stats/modelo_prediccion.py; barras de P(aprobar) y P(reprobar) en La Profecía."),
+    ]
+    for bold, txt in items_desc:
+        add_bullet(doc, txt, bold_prefix=bold)
+
+    add_heading(doc, "2.5.2  Validación e Inferencia", level=3)
+    items_inf = [
+        ("Correlación:", "Pearson entre horas de estudio y promedio final — implementado en "
+         "Grimorio Avanzado (Sección III) y stats/regresion_lineal.py."),
+        ("Inferencia:", "Intervalos de confianza al 95% (stats/descriptiva.py) y prueba "
+         "t de Student con varianza combinada pooled (stats/prueba_hipotesis.py)."),
+        ("Predicción:", "Regresión lineal simple por mínimos cuadrados (β₀, β₁, R²) "
+         "implementada en stats/regresion_lineal.py y documentada en Grimorio Avanzado Sección IV."),
+    ]
+    for bold, txt in items_inf:
+        add_bullet(doc, txt, bold_prefix=bold)
+
+    # ── Visualización ─────────────────────────────────────────────────
+    add_heading(doc, "2.6  Visualización y Dashboard", level=2)
+
+    add_heading(doc, "2.6.1  Componentes Visuales Implementados", level=3)
+    vizuals = [
+        "Histogramas con curva de distribución normal superpuesta (área=1).",
+        "Boxplots por carrera para comparación de grupos.",
+        "Gráficos de barras: medias por situación laboral, nivel de estrés, género y estilo de aprendizaje.",
+        "Gráfico circular (pie) de clasificación de estudiantes por nivel.",
+        "Gráfico de barras comparativo en El Juicio Final (escenario real vs. simulado).",
+    ]
+    for v in vizuals:
+        add_bullet(doc, v, "•")
+
+    add_heading(doc, "2.6.2  Patrones Identificados Automáticamente", level=3)
+    patrones = [
+        "Clasificación automática en tres niveles: Alto Rendimiento (≥8.5 y asistencia ≥85%), "
+        "Nivel Medio (≥7.0 y asistencia ≥70%), En Riesgo (resto).",
+        "Identificación de estudiantes que trabajan con promedio por debajo de la media del grupo.",
+        "Detección de baja asistencia como factor de riesgo de deserción (Los Rituales).",
+        "Recomendaciones personalizadas según nivel y situación laboral.",
+    ]
+    for p_txt in patrones:
+        add_bullet(doc, p_txt, "•")
+
+    # ── Tecnologías ───────────────────────────────────────────────────
+    add_heading(doc, "2.7  Tecnologías Utilizadas", level=2)
+
+    tbl_t = doc.add_table(rows=4, cols=2)
+    tbl_t.style = "Table Grid"
+    tec_rows = [
+        ("Componente",           "Biblioteca / Herramienta"),
+        ("Interfaz gráfica",     "Python 3 + Tkinter"),
+        ("Análisis estadístico", "NumPy, SciPy (scipy.stats)"),
+        ("Visualización",        "Matplotlib (TkAgg + PdfPages)"),
+    ]
+    tec_rows2 = [
+        ("Manejo de datos",      "pandas"),
+        ("Exportación PDF",      "matplotlib.backends.backend_pdf"),
+        ("Exportación Word",     "python-docx"),
+        ("Distribución",         "GitHub — repositorio del equipo"),
+    ]
+    for r_idx, (col0, col1) in enumerate(tec_rows):
+        cells = tbl_t.rows[r_idx].cells
+        cells[0].text = col0
+        cells[1].text = col1
+        if r_idx == 0:
+            for c in cells:
+                set_cell_bg(c, "1A1A2E")
+                c.paragraphs[0].runs[0].font.bold      = True
+                c.paragraphs[0].runs[0].font.color.rgb = RGBColor(220, 220, 255)
+    for col0, col1 in tec_rows2:
+        row = tbl_t.add_row().cells
+        row[0].text = col0
+        row[1].text = col1
+    doc.add_paragraph()
+
+    add_para(doc,
+             "El proyecto utilizó la Opción 1 (Python) de las tecnologías sugeridas, "
+             "implementando un sistema de escritorio completo con análisis estadístico avanzado, "
+             "visualizaciones interactivas y exportación de reportes.")
+
+    # ── Valor agregado ────────────────────────────────────────────────
+    add_heading(doc, "2.8  Valor Agregado y Resultados Obtenidos", level=2)
+
+    valor_items = [
+        ("Clasificación Automática:",
+         "Cada estudiante es clasificado en Alto Rendimiento, Medio o En Riesgo "
+         "con criterios combinados de promedio y asistencia."),
+        ("Recomendaciones:",
+         "Los Rituales genera alertas y acciones concretas para cada estudiante en riesgo: "
+         "asesoría docente, grupos de estudio, plataformas de apoyo."),
+        ("Exportación PDF:",
+         "El botón 'Exportar PDF' en El Grimorio genera un reporte ejecutivo de 4 páginas "
+         "con portada, estadística descriptiva, prueba de hipótesis y visualizaciones."),
+        ("Exportación CSV:",
+         "Los datos cargados y las recomendaciones de Los Rituales pueden exportarse en CSV."),
+        ("Grimorio Avanzado:",
+         "Pantalla pedagógica que muestra cada fórmula sustituida con los datos reales, "
+         "permitiendo verificar manualmente cada resultado estadístico."),
+        ("Simulación What-If:",
+         "El Juicio Final simula el cambio de situación laboral de cualquier estudiante "
+         "y muestra el impacto estimado en su calificación predicha."),
+    ]
+    for bold, txt in valor_items:
+        add_bullet(doc, txt, bold_prefix=bold)
+
+    doc.add_paragraph()
+
 def add_method_entry(doc, num, nombre, donde, como, formula=None):
     """Agrega una entrada de método estadístico en la tabla del documento."""
     table = doc.add_table(rows=1, cols=2)
@@ -567,17 +801,22 @@ def crear_documento():
     add_heading(doc, "1. Introducción", level=1)
     add_para(doc,
              "El presente documento explica cómo el Sistema de Análisis Estadístico Académico "
-             "cumple con cada uno de los métodos y conceptos estadísticos requeridos por la asignatura "
-             "de Probabilidad y Estadística. Para cada método se indica: (a) dónde se aplica dentro "
-             "del sistema, (b) cómo fue implementado en el código Python, y (c) la fórmula matemática "
-             "correspondiente.")
+             "cumple con cada uno de los requisitos y métodos estadísticos establecidos por la "
+             "asignatura de Probabilidad y Estadística. Para cada método se indica: (a) dónde se "
+             "aplica dentro del sistema, (b) cómo fue implementado en el código Python, y (c) la "
+             "fórmula matemática correspondiente.")
     add_para(doc,
              "El sistema fue desarrollado en Python utilizando las bibliotecas NumPy, SciPy, Pandas, "
-             "Matplotlib y Tkinter. La hipótesis central (Hipótesis B) establece que los estudiantes "
-             "que trabajan tienen un promedio académico significativamente menor que los que no trabajan.")
+             "Matplotlib y Tkinter. La hipótesis central (Hipótesis B — Opción Empleo) establece que "
+             "los estudiantes que trabajan tienen un promedio académico significativamente menor que "
+             "los que no trabajan.")
+
+    # ── Especificaciones del proyecto ─────────────────────────────────
+    doc.add_page_break()
+    agregar_seccion_requisitos(doc)
 
     # ── Arquitectura ──────────────────────────────────────────────────
-    add_heading(doc, "2. Arquitectura del Sistema", level=1)
+    add_heading(doc, "3. Arquitectura del Sistema", level=1)
     modulos = [
         ("data/estudiante.py",         "Modelo de datos — clase Estudiante con 25+ campos"),
         ("data/data_store.py",         "Singleton de almacenamiento en memoria"),
@@ -609,7 +848,7 @@ def crear_documento():
     doc.add_paragraph()
 
     # ── Métodos estadísticos ──────────────────────────────────────────
-    add_heading(doc, "3. Cumplimiento de Requisitos por Método Estadístico", level=1)
+    add_heading(doc, "4. Cumplimiento de Requisitos por Método Estadístico", level=1)
     add_para(doc,
              "A continuación se detalla, para cada uno de los 48 métodos estadísticos requeridos, "
              "cómo fue implementado o referenciado en el sistema.")
@@ -620,7 +859,7 @@ def crear_documento():
 
     # ── Conclusión ────────────────────────────────────────────────────
     doc.add_page_break()
-    add_heading(doc, "4. Conclusión", level=1)
+    add_heading(doc, "5. Conclusión", level=1)
     add_para(doc,
              "El Sistema de Análisis Estadístico Académico implementa de forma directa los métodos "
              "fundamentales del curso: estadística descriptiva completa, prueba t de Student con "
