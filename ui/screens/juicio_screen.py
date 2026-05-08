@@ -31,11 +31,18 @@ class JuicioScreen:
         self._lbl_profecia: tk.Label | None = None
         self._fig_frame: tk.Frame | None = None
         self._trabaja_sim: tk.BooleanVar | None = None
-        self._calculo_vars: dict = {}   # etiqueta → tk.StringVar para filas de cálculo
+        self._calculo_vars: dict = {}
+
+        # Búsqueda de estudiante
+        self._listbox: tk.Listbox | None = None
+        self._search_var: tk.StringVar | None = None
+        self._filtro_var: tk.StringVar | None = None
+        self._filtrados: list = []
+        self._todos: list = []
 
     def render(self, parent: tk.Frame):
         parent.configure(bg=BG_MAIN)
-        ds = DataStore.get()
+        ds  = DataStore.get()
         est = ds.estudiantes
 
         tk.Label(parent, text="⚖  EL JUICIO FINAL  ⚖",
@@ -51,24 +58,76 @@ class JuicioScreen:
                      font=FONT_BODY, fg=COLOR_RIESGO, bg=BG_MAIN).pack(pady=30)
             return
 
+        self._todos = list(est)
         prom_trab = [e.promedio_final for e in est if     e.trabaja]
         prom_no   = [e.promedio_final for e in est if not e.trabaja]
         self._oraculo.entrenar(prom_trab, prom_no)
 
-        # ── Selector de estudiante ─────────────────────────────────────
+        # ── Selector de estudiante con búsqueda ───────────────────────
         top = GothicCard(parent, padx=20, pady=10)
         top.pack(padx=24, fill="x", pady=(0, 8))
 
         tk.Label(top, text="Estudiante a juzgar:",
                  font=FONT_BODY, fg=COLOR_GOLD, bg=BG_CARD).pack(anchor="w")
-        nombres = [str(e) for e in est]
-        self._var_est = tk.StringVar(value=nombres[0])
-        opt = tk.OptionMenu(top, self._var_est, *nombres,
-                            command=lambda _: self._al_cambiar_estudiante(est))
-        opt.config(font=FONT_BODY, bg=BG_SECONDARY, fg=COLOR_GOLD,
-                   relief="flat", bd=0, activebackground=COLOR_PURPLE)
-        opt["menu"].config(bg=BG_SECONDARY, fg=COLOR_GOLD, font=FONT_SMALL)
-        opt.pack(fill="x", pady=4)
+
+        # Fila: búsqueda + filtro por situación laboral
+        fila_top = tk.Frame(top, bg=BG_CARD)
+        fila_top.pack(fill="x", pady=(4, 0))
+
+        # Buscador
+        self._search_var = tk.StringVar()
+        entry_frame = tk.Frame(fila_top, bg=COLOR_BORDER, bd=1)
+        entry_frame.pack(side="left", fill="x", expand=True, padx=(0, 12))
+        tk.Label(entry_frame, text=" 🔍 ", font=FONT_SMALL,
+                 fg=COLOR_GOLD_DIM, bg=BG_INPUT).pack(side="left")
+        tk.Entry(entry_frame, textvariable=self._search_var,
+                 font=FONT_SMALL, bg=BG_INPUT, fg=COLOR_GOLD,
+                 insertbackground=COLOR_GOLD, relief="flat", bd=4).pack(
+                     side="left", fill="x", expand=True)
+
+        # Filtro por situación laboral
+        self._filtro_var = tk.StringVar(value="todos")
+        filtro_frame = tk.Frame(fila_top, bg=BG_CARD)
+        filtro_frame.pack(side="left")
+        for txt, val, color in [
+            ("Todos",       "todos",     COLOR_GOLD_DIM),
+            ("Trabajan",    "trabaja",   COLOR_RIESGO),
+            ("No trabajan", "no_trabaja", COLOR_ALTO),
+        ]:
+            tk.Radiobutton(
+                filtro_frame, text=txt, variable=self._filtro_var, value=val,
+                font=("Palatino Linotype", 9, "bold"),
+                fg=color, bg=BG_CARD, selectcolor=COLOR_PURPLE,
+                activebackground=BG_CARD, activeforeground=color,
+                command=self._filtrar,
+            ).pack(side="left", padx=4)
+
+        # Listbox con scrollbar
+        lb_frame = tk.Frame(top, bg=BG_CARD)
+        lb_frame.pack(fill="x", pady=(4, 0))
+
+        scrollbar = tk.Scrollbar(lb_frame, orient="vertical")
+        self._listbox = tk.Listbox(
+            lb_frame,
+            font=("Courier New", 10),
+            bg=BG_INPUT, fg=COLOR_GOLD,
+            selectbackground=COLOR_PURPLE,
+            selectforeground="#FFFFFF",
+            relief="flat", bd=0,
+            height=5,
+            yscrollcommand=scrollbar.set,
+            activestyle="none",
+        )
+        scrollbar.config(command=self._listbox.yview)
+        scrollbar.pack(side="right", fill="y")
+        self._listbox.pack(fill="x", expand=True)
+        self._listbox.bind("<<ListboxSelect>>", lambda _: self._al_seleccionar())
+
+        # Conectar búsqueda en vivo
+        self._search_var.trace_add("write", lambda *_: self._filtrar())
+
+        # Poblar listbox inicial
+        self._poblar_lista(self._todos)
 
         # ── Controles de simulación ────────────────────────────────────
         ctrl = GothicCard(parent, padx=20, pady=10)
@@ -118,17 +177,17 @@ class JuicioScreen:
         self._calculo_body.pack(fill="x")
 
         _filas = [
-            ("grupo_sim",    "Grupo simulado:"),
-            ("media_grupo",  "Media del grupo  (μ):"),
-            ("desv_grupo",   "Desv. estándar grupo  (σ):"),
-            ("horas",        "Horas de estudio del alumno:"),
-            ("ajuste_form",  "Ajuste por horas  (fórmula):"),
-            ("ajuste_val",   "Ajuste calculado:"),
-            ("cal_form",     "Calificación predicha  (fórmula):"),
-            ("cal_val",      "Calificación predicha  (resultado):"),
-            ("prob_form",    "P(aprobar ≥ 6)  (fórmula):"),
-            ("prob_val",     "P(aprobar ≥ 6)  (resultado):"),
-            ("delta",        "Δ respecto a situación real:"),
+            ("grupo_sim",   "Grupo simulado:"),
+            ("media_grupo", "Media del grupo  (μ):"),
+            ("desv_grupo",  "Desv. estándar grupo  (σ):"),
+            ("horas",       "Horas de estudio del alumno:"),
+            ("ajuste_form", "Ajuste por horas  (fórmula):"),
+            ("ajuste_val",  "Ajuste calculado:"),
+            ("cal_form",    "Calificación predicha  (fórmula):"),
+            ("cal_val",     "Calificación predicha  (resultado):"),
+            ("prob_form",   "P(aprobar ≥ 6)  (fórmula):"),
+            ("prob_val",    "P(aprobar ≥ 6)  (resultado):"),
+            ("delta",       "Δ respecto a situación real:"),
         ]
         self._calculo_vars = {}
         for key, etiqueta in _filas:
@@ -143,7 +202,8 @@ class JuicioScreen:
             tk.Label(row, textvariable=var,
                      font=("Courier New", 10),
                      fg=COLOR_GOLD_DIM, bg=BG_CARD,
-                     anchor="w", justify="left", wraplength=700).pack(side="left", fill="x", expand=True)
+                     anchor="w", justify="left", wraplength=700).pack(
+                         side="left", fill="x", expand=True)
 
         # ── Área de resultado ─────────────────────────────────────────
         result_row = tk.Frame(parent, bg=BG_MAIN)
@@ -178,27 +238,80 @@ class JuicioScreen:
         self._fig_frame = tk.Frame(right, bg=BG_MAIN)
         self._fig_frame.pack(fill="both", expand=True)
 
-        self._al_cambiar_estudiante(est)
+        # Seleccionar y calcular el primer alumno
+        if self._listbox and self._listbox.size() > 0:
+            self._listbox.selection_set(0)
+            self._al_seleccionar()
 
-    # ── Helpers ───────────────────────────────────────────────────────
-    def _al_cambiar_estudiante(self, est):
-        nombre = self._var_est.get()
-        e = next((x for x in est if str(x) == nombre), None)
-        if e and self._trabaja_sim is not None:
+    # ══════════════════════════════════════════════════════════════════
+    # Búsqueda y filtrado
+    # ══════════════════════════════════════════════════════════════════
+    def _poblar_lista(self, estudiantes: list):
+        if self._listbox is None:
+            return
+        self._filtrados = list(estudiantes)
+        self._listbox.delete(0, "end")
+        for e in self._filtrados:
+            trabaja_tag = "  [Trabaja]   " if e.trabaja else "  [No trabaja]"
+            self._listbox.insert("end", f"  {e.nombre:<30} {trabaja_tag}  [{e.id}]")
+
+    def _filtrar(self):
+        if self._search_var is None or self._filtro_var is None:
+            return
+        q      = self._search_var.get().strip().lower()
+        filtro = self._filtro_var.get()
+
+        candidatos = self._todos
+        if filtro == "trabaja":
+            candidatos = [e for e in self._todos if e.trabaja]
+        elif filtro == "no_trabaja":
+            candidatos = [e for e in self._todos if not e.trabaja]
+
+        if q:
+            candidatos = [
+                e for e in candidatos
+                if q in e.nombre.lower() or q in e.id.lower()
+            ]
+
+        prev = self._get_seleccionado()
+        self._poblar_lista(candidatos)
+
+        # Intentar mantener la selección previa
+        if prev is not None and self._listbox:
+            for i, e in enumerate(self._filtrados):
+                if e.id == prev.id:
+                    self._listbox.selection_set(i)
+                    self._listbox.see(i)
+                    return
+        # Si no hay selección previa o ya no está, seleccionar el primero
+        if self._listbox and self._listbox.size() > 0:
+            self._listbox.selection_set(0)
+
+    def _get_seleccionado(self):
+        if self._listbox is None:
+            return None
+        sel = self._listbox.curselection()
+        if not sel or sel[0] >= len(self._filtrados):
+            return None
+        return self._filtrados[sel[0]]
+
+    def _al_seleccionar(self):
+        e = self._get_seleccionado()
+        if e is not None and self._trabaja_sim is not None:
             self._trabaja_sim.set(e.trabaja)
         self._recalcular()
 
+    # ══════════════════════════════════════════════════════════════════
+    # Cálculo y visualización
+    # ══════════════════════════════════════════════════════════════════
     def _recalcular(self):
-        ds = DataStore.get()
-        est = ds.estudiantes
-        nombre = self._var_est.get()
-        e = next((x for x in est if str(x) == nombre), None)
+        e = self._get_seleccionado()
         if e is None:
             return
 
-        trabaja_sim  = self._trabaja_sim.get()
-        resultado    = self._oraculo.predecir(trabaja_sim,  e.horas_estudio)
-        res_real     = self._oraculo.predecir(e.trabaja,    e.horas_estudio)
+        trabaja_sim = self._trabaja_sim.get() if self._trabaja_sim else e.trabaja
+        resultado   = self._oraculo.predecir(trabaja_sim,  e.horas_estudio)
+        res_real    = self._oraculo.predecir(e.trabaja,    e.horas_estudio)
 
         if self._medidor:
             self._medidor.set_value(resultado.calificacion_predicha)
@@ -213,8 +326,8 @@ class JuicioScreen:
         if self._lbl_profecia:
             delta = resultado.calificacion_predicha - res_real.calificacion_predicha
             signo = "+" if delta >= 0 else ""
-            estado_real = "Trabaja" if e.trabaja else "No trabaja"
-            estado_sim  = "Trabaja" if trabaja_sim  else "No trabaja"
+            estado_real = "Trabaja"    if e.trabaja    else "No trabaja"
+            estado_sim  = "Trabaja"    if trabaja_sim  else "No trabaja"
             self._lbl_profecia.config(
                 text=f'"{resultado.profecia}"\n\n'
                      f'Real ({estado_real}): {res_real.calificacion_predicha:.2f}  →  '
@@ -222,7 +335,6 @@ class JuicioScreen:
                      f'({signo}{delta:.2f})'
             )
 
-        # ── Actualizar procedimiento del cálculo ──────────────────────
         if self._calculo_vars:
             self._actualizar_calculo(e, trabaja_sim, resultado, res_real)
 
@@ -255,17 +367,16 @@ class JuicioScreen:
         v["horas"].set(f"{hrs:.1f} hrs/sem")
         v["ajuste_form"].set("ajuste  =  (horas_estudio − 10)  ×  0.04")
         v["ajuste_val"].set(
-            f"({hrs:.1f} − 10)  ×  0.04  =  {hrs-10:.1f}  ×  0.04  =  {ajuste_raw:+.4f} puntos"
+            f"({hrs:.1f} − 10)  ×  0.04  =  {hrs - 10:.1f}  ×  0.04  =  {ajuste_raw:+.4f} puntos"
         )
-        if cal_raw == cal:
+        if abs(cal_raw - cal) < 1e-9:
             v["cal_form"].set("calificación  =  μ  +  ajuste")
-            v["cal_val"].set(
-                f"{mu:.4f}  +  ({ajuste_raw:+.4f})  =  {cal:.4f}"
-            )
+            v["cal_val"].set(f"{mu:.4f}  +  ({ajuste_raw:+.4f})  =  {cal:.4f}")
         else:
             v["cal_form"].set("calificación  =  clamp(μ + ajuste, 0, 10)")
             v["cal_val"].set(
-                f"clamp({mu:.4f} + ({ajuste_raw:+.4f}), 0, 10)  =  clamp({cal_raw:.4f}, 0, 10)  =  {cal:.4f}"
+                f"clamp({mu:.4f} + ({ajuste_raw:+.4f}), 0, 10)  "
+                f"=  clamp({cal_raw:.4f}, 0, 10)  =  {cal:.4f}"
             )
         v["prob_form"].set(
             "P(aprobar)  =  P(X ≥ 6)  =  1 − Φ((5.9 − μ_pred) / σ_grupo)"
@@ -273,7 +384,7 @@ class JuicioScreen:
         z_val = (5.9 - cal) / se if se > 0 else 0
         v["prob_val"].set(
             f"1 − Φ((5.9 − {cal:.4f}) / {se:.4f})  "
-            f"=  1 − Φ({z_val:.4f})  =  {prob_ap:.4f}  ({prob_ap*100:.1f}%)"
+            f"=  1 − Φ({z_val:.4f})  =  {prob_ap:.4f}  ({prob_ap * 100:.1f}%)"
         )
         v["delta"].set(
             f"Sim. ({grupo_str}): {resultado.calificacion_predicha:.4f}  −  "
