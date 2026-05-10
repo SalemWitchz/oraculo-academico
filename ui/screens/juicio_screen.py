@@ -63,7 +63,7 @@ class JuicioScreen:
         prom_no   = [e.promedio_final for e in est if not e.trabaja]
         self._oraculo.entrenar(prom_trab, prom_no)
 
-        # ── Selector de estudiante con búsqueda ───────────────────────
+        # Selector de estudiante con búsqueda
         top = GothicCard(parent, padx=20, pady=10)
         top.pack(padx=24, fill="x", pady=(0, 8))
 
@@ -129,7 +129,7 @@ class JuicioScreen:
         # Poblar listbox inicial
         self._poblar_lista(self._todos)
 
-        # ── Controles de simulación ────────────────────────────────────
+        # Controles de simulación
         ctrl = GothicCard(parent, padx=20, pady=10)
         ctrl.pack(padx=24, fill="x", pady=(0, 8))
 
@@ -159,7 +159,7 @@ class JuicioScreen:
         GothicButton(ctrl, text="⚖  Pronunciar el Juicio",
                      accent=True, command=self._recalcular).pack(pady=(10, 0))
 
-        # ── Procedimiento del cálculo ─────────────────────────────────
+        # Procedimiento del cálculo
         calc_card = GothicCard(parent, padx=0, pady=0)
         calc_card.pack(padx=24, fill="x", pady=(0, 8))
 
@@ -205,7 +205,7 @@ class JuicioScreen:
                      anchor="w", justify="left", wraplength=700).pack(
                          side="left", fill="x", expand=True)
 
-        # ── Área de resultado ─────────────────────────────────────────
+        # Área de resultado
         result_row = tk.Frame(parent, bg=BG_MAIN)
         result_row.pack(fill="both", expand=True, padx=24, pady=4)
 

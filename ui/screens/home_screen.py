@@ -20,7 +20,7 @@ class HomeScreen:
         n = len(ds.estudiantes)
         counts = ds.count_by_nivel()
 
-        # ── Título ────────────────────────────────────────────────────
+        # Título
         tk.Label(parent, text="", bg=BG_MAIN).pack(pady=6)
         ornamento(parent).pack()
         tk.Label(parent, text="ORÁCULO GÓTICO ACADÉMICO",
@@ -32,7 +32,7 @@ class HomeScreen:
                  fg=COLOR_GOLD_DIM, bg=BG_MAIN, wraplength=700).pack(pady=4)
         ornamento(parent).pack(pady=(0, 16))
 
-        # ── Tarjetas de resumen ────────────────────────────────────────
+        # Tarjetas de resumen
         cards_frame = tk.Frame(parent, bg=BG_MAIN)
         cards_frame.pack()
 
@@ -64,7 +64,7 @@ class HomeScreen:
             StatCard(cards_frame2, "Con Reprobada", str(n_reprobo),
                      color=COLOR_RIESGO).grid(row=0, column=3, padx=10, pady=2, ipadx=12)
 
-        # ── Hipótesis ─────────────────────────────────────────────────
+        # Hipótesis
         hip = GothicCard(parent, padx=24, pady=14)
         hip.pack(padx=30, pady=14, fill="x")
 
@@ -84,7 +84,7 @@ class HomeScreen:
                  font=("Palatino Linotype", 10),
                  fg=COLOR_BORDER, bg=BG_CARD).pack(anchor="w", pady=(2, 0))
 
-        # ── Acciones rápidas ──────────────────────────────────────────
+        # Acciones rápidas
         btn_frame = tk.Frame(parent, bg=BG_MAIN)
         btn_frame.pack(pady=14)
 
@@ -96,7 +96,7 @@ class HomeScreen:
         GothicButton(btn_frame, text="✧  Abrir El Grimorio",
                      command=lambda: self.win.show("grimorio")).pack(side="left", padx=8)
 
-        # ── Info de flujo ─────────────────────────────────────────────
+        # Info de flujo
         info = GothicCard(parent, padx=20, pady=10)
         info.pack(padx=30, pady=(0, 16), fill="x")
         flujo = [

@@ -35,7 +35,7 @@ class RitualesScreen:
                      font=FONT_BODY, fg=COLOR_RIESGO, bg=BG_MAIN).pack(pady=30)
             return
 
-        # ── Resumen rápido ─────────────────────────────────────────────
+        # Resumen rápido
         counts = ds.count_by_nivel()
         resumen = GothicCard(parent, padx=20, pady=10)
         resumen.pack(padx=20, fill="x", pady=(0, 8))
@@ -53,7 +53,7 @@ class RitualesScreen:
             tk.Label(f, text=nivel, font=("Palatino Linotype", 10),
                      fg=COLOR_GOLD_DIM, bg=BG_CARD).pack()
 
-        # ── Filtro ─────────────────────────────────────────────────────
+        # Filtro
         fil_frame = GothicCard(parent, padx=16, pady=8)
         fil_frame.pack(padx=20, fill="x", pady=(0, 6))
         tk.Label(fil_frame, text="Filtrar por nivel:",
@@ -69,12 +69,12 @@ class RitualesScreen:
         GothicButton(fil_frame, text="⤓ Exportar CSV",
                      command=lambda: self._exportar(ds)).pack(side="right")
 
-        # ── Lista de rituales ──────────────────────────────────────────
+        # Lista de rituales
         lista_frame = tk.Frame(parent, bg=BG_MAIN)
         lista_frame.pack(fill="both", expand=True, padx=20)
         self._refresh_lista(lista_frame, ds)
 
-    # ── Helpers ───────────────────────────────────────────────────────
+    # Helpers
     def _refresh_lista(self, frame: tk.Frame, ds: DataStore):
         for w in frame.winfo_children():
             w.destroy()

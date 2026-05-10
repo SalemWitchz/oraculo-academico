@@ -43,7 +43,7 @@ class GrimorioScreen:
         scroll.pack(fill="both", expand=True)
         inner = scroll.inner
 
-        # ── Título ────────────────────────────────────────────────────
+        # Título
         hdr_row = tk.Frame(inner, bg=BG_MAIN)
         hdr_row.pack(fill="x", padx=18, pady=(8, 0))
 
@@ -61,19 +61,19 @@ class GrimorioScreen:
                  font=("Palatino Linotype", 11, "italic"),
                  fg=COLOR_GOLD_DIM, bg=BG_MAIN).pack(pady=(0, 10))
 
-        # ── Fila: Descriptiva Promedios + Asistencia ─────────────────
+        # Fila: Descriptiva Promedios + Asistencia
         row1 = tk.Frame(inner, bg=BG_MAIN)
         row1.pack(fill="x", padx=16, pady=4)
         self._tabla_descriptiva(row1, promedios,   "Promedio Final")
         self._tabla_descriptiva(row1, asistencias, "Asistencia (%)")
 
-        # ── Fila: Grupos (H_B) + Prueba de Hipótesis B ───────────────
+        # Fila: Grupos (H_B) + Prueba de Hipótesis B
         row2 = tk.Frame(inner, bg=BG_MAIN)
         row2.pack(fill="x", padx=16, pady=4)
         self._tabla_grupos(row2, prom_trab, prom_no)
         self._tabla_hipotesis_B(row2, prom_trab, prom_no)
 
-        # ── Gráficas ─────────────────────────────────────────────────
+        # Gráficas
         SectionTitle(inner, "Visualizaciones del Grimorio", bg=BG_MAIN
                      ).pack(anchor="w", padx=18, pady=(10, 4))
 
@@ -87,7 +87,7 @@ class GrimorioScreen:
 
         tk.Label(inner, text="", bg=BG_MAIN).pack(pady=10)
 
-    # ── Secciones ─────────────────────────────────────────────────────
+    # Secciones
     def _tabla_descriptiva(self, parent, datos, titulo):
         card = GothicCard(parent, padx=0, pady=0)
         card.pack(side="left", fill="both", expand=True, padx=6, pady=4)
@@ -162,7 +162,7 @@ class GrimorioScreen:
                  fg=BG_MAIN, bg=color_veredicto,
                  wraplength=320, justify="left", padx=8, pady=6).pack()
 
-    # ── Gráficas matplotlib ───────────────────────────────────────────
+    # Gráficas matplotlib
     def _graficas(self, parent, est, prom_trab, prom_no, promedios):
         fig = plt.Figure(figsize=(12, 8), facecolor=BG_MAIN)
 
@@ -277,7 +277,7 @@ class GrimorioScreen:
         ax.set_facecolor(BG_CARD)
         ax.set_title("Clasificación de Destinos", color=COLOR_GOLD)
 
-    # ── Gráficas ampliadas (datos formulario) ─────────────────────────
+    # Gráficas ampliadas (datos formulario)
     def _graficas_extendidas(self, parent, est):
         fig = plt.Figure(figsize=(12, 8), facecolor=BG_MAIN)
 
@@ -381,7 +381,7 @@ class GrimorioScreen:
         ax.set_ylim(0, 11)
         ax.tick_params(axis="x", labelsize=8)
 
-    # ── Exportar PDF ──────────────────────────────────────────────────
+    # Exportar PDF
     def _exportar_pdf(self, parent):
         import tkinter.filedialog as fd
         import tkinter.messagebox as mb

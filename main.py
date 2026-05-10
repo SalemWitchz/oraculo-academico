@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-╔══════════════════════════════════════════════════════╗
-║   SISTEMA DE ANÁLISIS ESTADÍSTICO ACADÉMICO         ║
-║   Hipótesis B — Situación Laboral → Rendimiento     ║
-║   Probabilidad y Estadística                        ║
-╚══════════════════════════════════════════════════════╝
+
+   SISTEMA DE ANÁLISIS ESTADÍSTICO ACADÉMICO         
+   Hipótesis B — Situación Laboral → Rendimiento     
+   Probabilidad y Estadística                        
+
 Ejecutar:  python main.py
 Instalar:  pip install -r requirements.txt
 """
 import sys
 from pathlib import Path
 
-# Asegura que el directorio raíz esté en el path
+# Asegura que el directorio raiz esté en el path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from data.data_store import DataStore

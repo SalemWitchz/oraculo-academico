@@ -16,7 +16,7 @@ from data.data_store import DataStore
 from stats import descriptiva as desc_mod
 from stats.prueba_hipotesis import prueba_hipotesis_B
 
-# ── Paleta (reproduce la app sin importar tkinter) ────────────────────────────
+# Paleta (reproduce la app sin importar tkinter)
 _BG    = "#0A0A0A"
 _CARD  = "#1A1A1A"
 _GOLD  = "#F0F0F0"
@@ -57,7 +57,7 @@ _EQUIPO = [
 ]
 
 
-# ── Helpers de tabla matplotlib ───────────────────────────────────────────────
+# Helpers de tabla matplotlib
 def _tabla_fig(ax, filas: list[tuple], col_widths=None):
     ax.axis("off")
     if not filas:
@@ -93,7 +93,7 @@ def _titulo_ax(ax, texto: str, sub: str = ""):
                 color=_DIM, ha="center", va="center")
 
 
-# ── Generador principal ───────────────────────────────────────────────────────
+# Generador principal
 def generar_reporte(ruta: str | None = None) -> str:
     """Genera el PDF y devuelve la ruta del archivo creado."""
     ds  = DataStore.get()
@@ -126,7 +126,7 @@ def generar_reporte(ruta: str | None = None) -> str:
     return ruta
 
 
-# ── Páginas del PDF ───────────────────────────────────────────────────────────
+# Páginas del PDF
 def _pagina_portada(pdf: PdfPages, n: int):
     fig = plt.figure(figsize=(8.5, 11), facecolor=_BG)
     ax  = fig.add_axes([0, 0, 1, 1])

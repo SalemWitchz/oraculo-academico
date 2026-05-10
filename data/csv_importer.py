@@ -5,7 +5,7 @@ Soporta dos formatos:
   1. Google Forms (detectado por columna 'Marca temporal').
   2. Formato propio (snake_case, columnas simples).
 
-Las asistencias se simulan deterministicamente cuando no están en el CSV.
+Las asistencias se simulan cuando no están en el CSV.
 """
 import csv
 import re
@@ -16,7 +16,7 @@ from pathlib import Path
 from data.estudiante import Estudiante
 
 
-# ── Helpers generales ─────────────────────────────────────────────────────────
+# Helpers 
 
 def _norm(s: str) -> str:
     nfkd = unicodedata.normalize("NFD", str(s))
@@ -99,7 +99,7 @@ def _detect_encoding(path: Path) -> str:
     return "latin-1"
 
 
-# ── Simulación determinista de asistencia ─────────────────────────────────────
+# Simulacion determinista de asistencia 
 
 def _simular_asistencia(nombre: str, trabaja: bool, h_trabajo_dia: float,
                          frecuencia: str, estres: str, gestion: bool) -> float:
@@ -122,7 +122,7 @@ def _simular_asistencia(nombre: str, trabaja: bool, h_trabajo_dia: float,
     return round(min(100.0, max(58.0, base + rng.uniform(-6, 6))), 1)
 
 
-# ── Diagnóstico global ────────────────────────────────────────────────────────
+# Diagnostico global 
 _ultimo_diagnostico: dict = {}
 
 
@@ -130,13 +130,13 @@ def get_diagnostico() -> dict:
     return _ultimo_diagnostico
 
 
-# ── Detección de formato ──────────────────────────────────────────────────────
+# Detección de formato
 
 def _is_google_forms(fieldnames: list[str]) -> bool:
     return any("marca temporal" in _norm(h) for h in fieldnames)
 
 
-# ── Búsqueda de columnas ──────────────────────────────────────────────────────
+# Búsqueda de columnas
 
 def _find_col(col_n: dict[str, str], *keywords) -> str | None:
     for kw in keywords:
@@ -165,7 +165,7 @@ def _grade_columns(col_n: dict[str, str]) -> list[str]:
     return result
 
 
-# ── Parser: Google Forms ──────────────────────────────────────────────────────
+# Parser: Google Forms
 
 def _importar_google_forms(reader, fieldnames: list[str]) -> tuple[list[Estudiante], dict]:
     col_n = {_norm(h): h for h in fieldnames}
@@ -321,7 +321,7 @@ def _importar_google_forms(reader, fieldnames: list[str]) -> tuple[list[Estudian
     return estudiantes, diagnostico
 
 
-# ── Parser: Formato propio ────────────────────────────────────────────────────
+# Parser: Formato propio
 
 _MAP_PROPIO: dict[str, str] = {
     "nombre": "nombre", "carrera": "carrera", "semestre": "semestre",
@@ -391,7 +391,7 @@ def _importar_formato_propio(reader, fieldnames: list[str]) -> tuple[list[Estudi
     return estudiantes, diagnostico
 
 
-# ── Función pública ───────────────────────────────────────────────────────────
+# Función pública
 
 def importar(ruta: str) -> list[Estudiante]:
     global _ultimo_diagnostico
@@ -414,7 +414,7 @@ def importar(ruta: str) -> list[Estudiante]:
     return estudiantes
 
 
-# ── Exportar ──────────────────────────────────────────────────────────────────
+# Exportar
 
 def exportar(estudiantes: list[Estudiante], ruta: str):
     with open(ruta, "w", newline="", encoding="utf-8-sig") as f:

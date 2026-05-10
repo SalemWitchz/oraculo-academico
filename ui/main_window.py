@@ -37,7 +37,7 @@ class MainWindow:
 
         DataStore.get().subscribe(self._refresh_sidebar_count)
 
-    # ── Construcción ──────────────────────────────────────────────────
+    # Construcción
     def _build_header(self):
         hdr = tk.Frame(self.root, bg=_HDR_BG, height=58)
         hdr.pack(side="top", fill="x")
@@ -127,7 +127,7 @@ class MainWindow:
         n = len(DataStore.get().estudiantes)
         self._count_lbl.config(text=str(n))
 
-    # ── Pantallas ─────────────────────────────────────────────────────
+    # Pantallas
     def _lazy_init_screens(self):
         from ui.screens.home_screen              import HomeScreen
         from ui.screens.data_entry               import DataEntryScreen
@@ -165,7 +165,7 @@ class MainWindow:
         if self._current_screen:
             self.show(self._current_screen)
 
-    # ── Run ───────────────────────────────────────────────────────────
+    # Run
     def run(self):
         self._lazy_init_screens()
         self.show("home")

@@ -29,7 +29,7 @@ class ProphecyScreen:
         estudiantes = ds.estudiantes
         self._todos = list(estudiantes)
 
-        # ── Encabezado ────────────────────────────────────────────────
+        # Encabezado
         tk.Label(parent, text="", bg=BG_MAIN).pack(pady=4)
         tk.Label(parent, text="✦  LA PROFECÍA  ✦",
                  font=("Palatino Linotype", 22, "bold"),
@@ -38,7 +38,7 @@ class ProphecyScreen:
                  text='"El oráculo lee tu destino académico en las sombras de los datos"',
                  font=FONT_PROPHECY, fg=COLOR_GOLD_DIM, bg=BG_MAIN).pack(pady=(2, 10))
 
-        # ── Selector con búsqueda ──────────────────────────────────────
+        # Selector con búsqueda
         sel_card = GothicCard(parent, padx=20, pady=12)
         sel_card.pack(padx=30, fill="x")
 
@@ -109,7 +109,7 @@ class ProphecyScreen:
             self._listbox.selection_set(0)
             self._entrenar_y_mostrar(estudiantes[0], parent, estudiantes)
 
-    # ── Búsqueda y selección ──────────────────────────────────────────
+    # Búsqueda y selección
     def _poblar_lista(self, estudiantes):
         self._filtrados = list(estudiantes)
         if self._listbox is None:
@@ -146,7 +146,7 @@ class ProphecyScreen:
         idx = sel[0]
         return self._filtrados[idx] if idx < len(self._filtrados) else None
 
-    # ── Lógica ────────────────────────────────────────────────────────
+    # Lógica
     def _predecir(self, parent, estudiantes):
         e = self._get_seleccionado()
         if e is None and self._filtrados:
@@ -168,10 +168,11 @@ class ProphecyScreen:
         frame = self._result_frame
         resultado = self._oraculo.predecir(
             e.trabaja, e.horas_estudio,
+            promedio_actual=e.promedio_final,
             seed=hash(e.nombre) % 3,
         )
 
-        # ── Fila principal ────────────────────────────────────────────
+        # Fila principal
         main_row = tk.Frame(frame, bg=BG_MAIN)
         main_row.pack(fill="x")
 
@@ -200,7 +201,7 @@ class ProphecyScreen:
         frame.update_idletasks()
         barra.set_value(resultado.prob_aprobar)
 
-        # ── Profecía + métricas ────────────────────────────────────────
+        # Profecía + métricas
         right = tk.Frame(main_row, bg=BG_MAIN)
         right.pack(side="left", fill="both", expand=True)
 
@@ -234,7 +235,7 @@ class ProphecyScreen:
         ]
         TablaSimple(metrics_card, filas, bg=BG_CARD).pack(fill="x", padx=0)
 
-        # ── Rituales recomendados ──────────────────────────────────────
+        # Rituales recomendados
         rit_card = GothicCard(right, padx=16, pady=10)
         rit_card.pack(fill="x")
         tk.Label(rit_card, text="☽  Rituales Recomendados:",

@@ -39,7 +39,7 @@ class GrimorioAvanzadoScreen:
         scroll.pack(fill="both", expand=True)
         inner = scroll.inner
 
-        # ── Título ────────────────────────────────────────────────────
+        # Título
         tk.Label(inner, text="✦  GRIMORIO AVANZADO  ✦",
                  font=("Palatino Linotype", 20, "bold"),
                  fg=COLOR_GOLD, bg=BG_MAIN).pack(pady=(8, 0))
@@ -48,7 +48,7 @@ class GrimorioAvanzadoScreen:
                  font=("Palatino Linotype", 11, "italic"),
                  fg=COLOR_GOLD_DIM, bg=BG_MAIN).pack(pady=(0, 12))
 
-        # ── I. Estadística Descriptiva ─────────────────────────────────
+        # I. Estadística Descriptiva
         SectionTitle(inner, "I. Estadística Descriptiva — Promedios Finales", bg=BG_MAIN
                      ).pack(anchor="w", padx=18, pady=(6, 2))
         self._paso_media(inner, promedios)
@@ -56,7 +56,7 @@ class GrimorioAvanzadoScreen:
         self._paso_desv_std(inner, promedios)
         self._paso_ic(inner, promedios)
 
-        # ── II. Prueba t de Student ────────────────────────────────────
+        # II. Prueba t de Student
         SectionTitle(inner, "II. Prueba t de Student — Hipótesis B (Situación Laboral)", bg=BG_MAIN
                      ).pack(anchor="w", padx=18, pady=(14, 2))
         if len(prom_trab) >= 2 and len(prom_no) >= 2:
@@ -68,7 +68,7 @@ class GrimorioAvanzadoScreen:
                      text="⚠ Se necesitan al menos 2 estudiantes en cada grupo (trabaja / no trabaja).",
                      font=FONT_SMALL, fg=COLOR_RIESGO, bg=BG_MAIN, padx=20).pack(anchor="w")
 
-        # ── III. Regresión Lineal Simple ───────────────────────────────
+        # III. Regresión Lineal Simple
         SectionTitle(inner, "III. Regresión Lineal Simple (Mínimos Cuadrados) — Promedio vs Horas de Estudio", bg=BG_MAIN
                      ).pack(anchor="w", padx=18, pady=(14, 2))
         self._paso_regresion(inner, promedios, horas_est)

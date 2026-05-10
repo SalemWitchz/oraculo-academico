@@ -19,11 +19,11 @@ class ModeloRegresion:
     x_mean: float
     y_mean: float
 
-    # ── Predicción ────────────────────────────────────────────────────
+    # Predicción
     def predecir(self, x: float) -> float:
         return self.beta0 + self.beta1 * x
 
-    # ── Representación ────────────────────────────────────────────────
+    # Representación
     def ecuacion(self) -> str:
         signo = "+" if self.beta0 >= 0 else "-"
         return f"y^ = {self.beta1:.4f}*x {signo} {abs(self.beta0):.4f}"

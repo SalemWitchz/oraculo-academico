@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """Paleta monocromática — blanco, negro y escala de grises."""
 
-# ── Fondos ────────────────────────────────────────────────────────────────────
+# Fondos
 BG_MAIN      = "#0A0A0A"
 BG_SECONDARY = "#111111"
 BG_CARD      = "#1A1A1A"
 BG_SIDEBAR   = "#0C0C0C"
 BG_INPUT     = "#141414"
 
-# ── Texto / Interactivos ──────────────────────────────────────────────────────
+# Texto / Interactivos
 COLOR_GOLD        = "#F0F0F0"   # texto principal → blanco suave
 COLOR_GOLD_BRIGHT = "#FFFFFF"   # énfasis → blanco puro
 COLOR_GOLD_DIM    = "#999999"   # texto secundario → gris medio
@@ -19,12 +19,12 @@ COLOR_RED_LT      = "#CCCCCC"   # btn accent hover
 COLOR_BORDER      = "#2E2E2E"   # bordes → gris muy oscuro
 COLOR_BORDER_LT   = "#555555"   # bordes resaltados
 
-# ── Estado académico (mantener legibilidad funcional) ─────────────────────────
+# Estado académico (mantener legibilidad funcional)
 COLOR_ALTO   = "#EEEEEE"    # alto rendimiento  → blanco/gris claro
 COLOR_MEDIO  = "#888888"    # nivel medio       → gris medio
 COLOR_RIESGO = "#DD3322"    # en riesgo         → rojo oscuro (alerta)
 
-# ── Tipografía ────────────────────────────────────────────────────────────────
+# Tipografía
 _SERIF = "Palatino Linotype"
 FONT_TITLE    = (_SERIF, 26, "bold")
 FONT_HEADING  = (_SERIF, 16, "bold")
@@ -37,12 +37,12 @@ FONT_NAV      = (_SERIF, 13)
 FONT_PROPHECY = (_SERIF, 14, "italic")
 FONT_ORACLE   = (_SERIF, 48, "bold")
 
-# ── Ventana ───────────────────────────────────────────────────────────────────
+# Ventana
 WIN_W         = 1280
 WIN_H         = 780
 SIDEBAR_W     = 215
 
-# ── Dominio ───────────────────────────────────────────────────────────────────
+# Dominio
 CARRERAS = [
     "Ingeniería en Sistemas",
     "Ingeniería Industrial",
@@ -56,7 +56,7 @@ MATERIAS  = ["Probabilidad y Estadística", "Cálculo Diferencial",
              "Álgebra Lineal", "Programación", "Bases de Datos"]
 SEMESTRES = list(range(1, 10))
 
-# ── Matplotlib monocromático ──────────────────────────────────────────────────
+# Matplotlib monocromático
 MPL_STYLE = {
     "figure.facecolor":       BG_MAIN,
     "figure.edgecolor":       COLOR_BORDER,

@@ -20,7 +20,7 @@ class DataStore:
     def get(cls) -> "DataStore":
         return cls()
 
-    # ── Acceso ──────────────────────────────────────────────────────────
+    # Acceso
     @property
     def estudiantes(self) -> List[Estudiante]:
         return self._estudiantes
@@ -41,7 +41,7 @@ class DataStore:
         self._estudiantes.clear()
         self._notify()
 
-    # ── Observadores ────────────────────────────────────────────────────
+    # Observadores
     def subscribe(self, fn: Callable):
         self._observers.append(fn)
 
@@ -49,7 +49,7 @@ class DataStore:
         for fn in self._observers:
             fn()
 
-    # ── Utilidades ──────────────────────────────────────────────────────
+    # Utilidades
     def to_df(self) -> pd.DataFrame:
         if not self._estudiantes:
             return pd.DataFrame()

@@ -90,12 +90,17 @@ class Oraculo:
         self._trained = True
 
     def predecir(self, trabaja: bool, horas_estudio: float = 0.0,
+                 promedio_actual: float | None = None,
                  seed: int = 0) -> ResultadoPrediccion:
-        base = self._m_trab if trabaja else self._m_no
-        se   = self._s_trab if trabaja else self._s_no
+        grupo_base = self._m_trab if trabaja else self._m_no
+        se         = self._s_trab if trabaja else self._s_no
 
-        ajuste = (horas_estudio - 10) * 0.04
-        cal = round(min(10.0, max(0.0, base + ajuste)), 2)
+        # Ancla en el promedio real del alumno; si no hay dato usa la media del grupo
+        base = promedio_actual if promedio_actual is not None else grupo_base
+
+        # Interpolación lineal: 0 hrs → promedio actual, 16 hrs → 10
+        horas_norm = min(horas_estudio, 16.0) / 16.0
+        cal = round(min(10.0, max(0.0, base + horas_norm * (10.0 - base))), 2)
 
         prob_ap = float(sp_stats.norm.sf(5.9, loc=cal, scale=se))
         prob_ap = max(0.0, min(1.0, prob_ap))

@@ -31,7 +31,7 @@ class DataEntryScreen:
                  font=("Palatino Linotype", 11, "italic"),
                  fg=COLOR_GOLD_DIM, bg=BG_MAIN).pack(pady=(0, 8))
 
-        # ── Acciones de importación ────────────────────────────────────
+        # Acciones de importación
         acc = GothicCard(parent, padx=20, pady=12)
         acc.pack(padx=20, fill="x", pady=(0, 8))
         tk.Label(acc, text="Fuentes de datos:",
@@ -57,7 +57,7 @@ class DataEntryScreen:
                  font=("Palatino Linotype", 9),
                  fg=COLOR_BORDER, bg=BG_CARD, justify="left", wraplength=700).pack(anchor="w", pady=(6, 0))
 
-        # ── Formulario manual ──────────────────────────────────────────
+        # Formulario manual
         form_toggle = GothicButton(parent,
                                    text="+ Agregar estudiante manualmente",
                                    command=lambda: self._toggle_form(form_area))
@@ -67,12 +67,12 @@ class DataEntryScreen:
         self._form_visible = False
         self._form_widgets = {}
 
-        # ── Tabla de datos ────────────────────────────────────────────
+        # Tabla de datos
         self._tabla_frame = tk.Frame(parent, bg=BG_MAIN)
         self._tabla_frame.pack(fill="both", expand=True, padx=20, pady=6)
         self._actualizar_tabla(ds)
 
-    # ── Importar / Exportar ───────────────────────────────────────────
+    # Importar / Exportar
     def _importar(self, parent, ds: DataStore):
         ruta = filedialog.askopenfilename(
             filetypes=[("CSV", "*.csv"), ("Todos", "*.*")],
@@ -150,7 +150,7 @@ class DataEntryScreen:
             ds.clear()
             self._actualizar_tabla(ds)
 
-    # ── Formulario manual ──────────────────────────────────────────────
+    # Formulario manual
     def _toggle_form(self, frame: tk.Frame):
         if self._form_visible:
             frame.pack_forget()
@@ -231,7 +231,7 @@ class DataEntryScreen:
         except ValueError as ex:
             messagebox.showerror("Error", f"Datos inválidos: {ex}")
 
-    # ── Tabla ──────────────────────────────────────────────────────────
+    # Tabla
     def _actualizar_tabla(self, ds: DataStore):
         for w in self._tabla_frame.winfo_children():
             w.destroy()

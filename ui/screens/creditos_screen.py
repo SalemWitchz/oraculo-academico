@@ -60,7 +60,7 @@ class CreditosScreen:
         scroll.pack(fill="both", expand=True)
         inner = scroll.inner
 
-        # ── Encabezado ────────────────────────────────────────────────
+        # Encabezado
         tk.Label(inner, text="☆  CRÉDITOS  ☆",
                  font=("Palatino Linotype", 24, "bold"),
                  fg=COLOR_GOLD, bg=BG_MAIN).pack(pady=(16, 2))
@@ -70,19 +70,19 @@ class CreditosScreen:
                  fg=COLOR_GOLD_DIM, bg=BG_MAIN).pack(pady=(0, 4))
         tk.Frame(inner, bg=COLOR_BORDER, height=1).pack(fill="x", padx=40, pady=(4, 16))
 
-        # ── Información del proyecto ──────────────────────────────────
+        # Información del proyecto
         self._seccion_info(inner)
 
-        # ── Equipo ────────────────────────────────────────────────────
+        # Equipo
         self._seccion_equipo(inner)
 
-        # ── Referencias ───────────────────────────────────────────────
+        # Referencias
         tk.Label(inner, text="─── ◆ ◆ ◆ ───",
                  font=("Palatino Linotype", 13),
                  fg=COLOR_BORDER_LT, bg=BG_MAIN).pack(pady=(20, 4))
         self._seccion_referencias(inner)
 
-        # ── Pie ───────────────────────────────────────────────────────
+        # Pie
         tk.Label(inner,
                  text="Desarrollado con Python · Tkinter · Matplotlib · SciPy · NumPy · pandas",
                  font=("Palatino Linotype", 9, "italic"),
@@ -92,7 +92,7 @@ class CreditosScreen:
                  font=("Palatino Linotype", 9, "italic"),
                  fg=COLOR_BORDER_LT, bg=BG_MAIN).pack(pady=(0, 20))
 
-    # ── Sub-secciones ─────────────────────────────────────────────────
+    # Sub-secciones
     def _seccion_info(self, parent):
         card = GothicCard(parent, padx=0, pady=0)
         card.pack(fill="x", padx=60, pady=(0, 12))

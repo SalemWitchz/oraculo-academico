@@ -10,7 +10,7 @@ from config import (
 from ui.widgets import GothicCard, GothicButton, ScrollableFrame, SectionTitle
 
 
-# ── Contenido de cada sección ─────────────────────────────────────────────────
+# Contenido de cada sección
 _SECCIONES = [
     {
         "icono": "⊕",
@@ -176,7 +176,7 @@ class GuiaScreen:
     def render(self, parent: tk.Frame):
         parent.configure(bg=BG_MAIN)
 
-        # ── Encabezado ────────────────────────────────────────────────
+        # Encabezado
         hdr = tk.Frame(parent, bg=BG_MAIN)
         hdr.pack(fill="x", padx=24, pady=(12, 4))
 
@@ -192,10 +192,10 @@ class GuiaScreen:
 
         tk.Frame(parent, bg=COLOR_BORDER, height=1).pack(fill="x", padx=24, pady=(4, 8))
 
-        # ── Resumen de pantallas ──────────────────────────────────────
+        # Resumen de pantallas
         self._tarjetas_resumen(parent)
 
-        # ── Secciones expandibles ─────────────────────────────────────
+        # Secciones expandibles
         scroll = ScrollableFrame(parent)
         scroll.pack(fill="both", expand=True, padx=16, pady=(0, 8))
         inner = scroll.inner
@@ -205,7 +205,7 @@ class GuiaScreen:
 
         tk.Label(inner, text="", bg=BG_MAIN).pack(pady=12)
 
-    # ── Tarjetas de resumen ───────────────────────────────────────────
+    # Tarjetas de resumen
     def _tarjetas_resumen(self, parent):
         row = tk.Frame(parent, bg=BG_MAIN)
         row.pack(fill="x", padx=20, pady=(0, 8))
@@ -232,14 +232,14 @@ class GuiaScreen:
                      font=("Palatino Linotype", 9),
                      fg=COLOR_GOLD_DIM, bg=BG_CARD).pack()
 
-    # ── Sección expandible ────────────────────────────────────────────
+    # Sección expandible
     def _seccion(self, parent, idx: int, sec: dict):
         self._abiertos[idx] = False
 
         wrapper = tk.Frame(parent, bg=BG_MAIN)
         wrapper.pack(fill="x", pady=3)
 
-        # ── Cabecera (clickable) ──────────────────────────────────────
+        # Cabecera (clickable)
         header = tk.Frame(wrapper, bg=BG_CARD,
                           highlightbackground=COLOR_BORDER,
                           highlightthickness=1)
@@ -269,7 +269,7 @@ class GuiaScreen:
                          fg=COLOR_GOLD_DIM, bg=BG_CARD)
         arrow.pack(side="right", padx=14)
 
-        # ── Contenido (oculto inicialmente) ──────────────────────────
+        # Contenido (oculto inicialmente)
         body = tk.Frame(wrapper, bg=BG_INPUT,
                         highlightbackground=COLOR_BORDER,
                         highlightthickness=1)
@@ -292,7 +292,7 @@ class GuiaScreen:
         header.bind("<Leave>",
                     lambda e, h=header: h.configure(highlightbackground=COLOR_BORDER))
 
-        # ── Contenido interno ─────────────────────────────────────────
+        # Contenido interno
         self._body_content(body, sec)
 
     def _body_content(self, body: tk.Frame, sec: dict):

@@ -16,7 +16,7 @@ _BTN_NORMAL_HOVER = "#383838"
 _BTN_NORMAL_FG    = "#F0F0F0"
 
 
-# ── Utilidad ──────────────────────────────────────────────────────────────────
+# Utilidad
 def color_nivel(nivel: str) -> str:
     return {
         "Alto Rendimiento": COLOR_ALTO,
@@ -25,7 +25,7 @@ def color_nivel(nivel: str) -> str:
     }.get(nivel, COLOR_GOLD_DIM)
 
 
-# ── ScrollableFrame ───────────────────────────────────────────────────────────
+# ScrollableFrame
 class ScrollableFrame(tk.Frame):
     def __init__(self, parent, **kw):
         super().__init__(parent, bg=kw.pop("bg", BG_MAIN), **kw)
@@ -44,7 +44,7 @@ class ScrollableFrame(tk.Frame):
                         lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
 
-# ── GothicCard ────────────────────────────────────────────────────────────────
+# GothicCard
 class GothicCard(tk.Frame):
     """Panel con fondo oscuro y borde gris."""
     def __init__(self, parent, **kw):
@@ -58,7 +58,7 @@ class GothicCard(tk.Frame):
                        highlightcolor=COLOR_BORDER_LT)
 
 
-# ── GothicButton ──────────────────────────────────────────────────────────────
+# GothicButton
 class GothicButton(tk.Button):
     """Botón con dos estilos: normal (oscuro) y accent (blanco invertido)."""
     def __init__(self, parent, accent=False, **kw):
@@ -83,7 +83,7 @@ class GothicButton(tk.Button):
         self.bind("<Leave>", lambda e: self.config(bg=bg_n))
 
 
-# ── SectionTitle ──────────────────────────────────────────────────────────────
+# SectionTitle
 class SectionTitle(tk.Frame):
     def __init__(self, parent, text, **kw):
         bg = kw.pop("bg", BG_MAIN)
@@ -96,7 +96,7 @@ class SectionTitle(tk.Frame):
                  ).pack(side="left", fill="x", expand=True, padx=10, pady=8)
 
 
-# ── Separador ─────────────────────────────────────────────────────────────────
+# Separador
 class GothicSep(tk.Canvas):
     def __init__(self, parent, width=600, **kw):
         kw.setdefault("height", 12)
@@ -106,7 +106,7 @@ class GothicSep(tk.Canvas):
         self.create_line(0, 6, width, 6, fill=COLOR_BORDER, width=1, dash=(4, 4))
 
 
-# ── StatCard (con animación de conteo) ────────────────────────────────────────
+# StatCard (con animación de conteo)
 class StatCard(GothicCard):
     """Tarjeta pequeña con número grande + etiqueta, con animación."""
     def __init__(self, parent, label: str, value: str, color: str = COLOR_GOLD, **kw):
@@ -130,7 +130,7 @@ class StatCard(GothicCard):
             self.after(38, lambda: self._count_up(min(current + step, target), target))
 
 
-# ── TablaSimple ───────────────────────────────────────────────────────────────
+# TablaSimple
 class TablaSimple(tk.Frame):
     """Tabla minimalista (lista de (clave, valor))."""
     def __init__(self, parent, filas: list[tuple[str, str]], **kw):
@@ -157,14 +157,14 @@ class TablaSimple(tk.Frame):
         self.columnconfigure(1, weight=1)
 
 
-# ── Ornamento ─────────────────────────────────────────────────────────────────
+# Ornamento
 def ornamento(parent, bg=BG_MAIN) -> tk.Label:
     return tk.Label(parent, text="─── ◆ ◆ ◆ ───",
                     font=("Palatino Linotype", 11),
                     fg=COLOR_BORDER_LT, bg=bg)
 
 
-# ── Medidor circular (con animación de entrada) ───────────────────────────────
+# Medidor circular (con animación de entrada)
 class Medidor(tk.Canvas):
     """Arco circular que muestra una calificación / 10 con animación."""
     SIZE = 220
@@ -216,7 +216,7 @@ class Medidor(tk.Canvas):
                          font=("Palatino Linotype", 13))
 
 
-# ── Barra de probabilidad ─────────────────────────────────────────────────────
+# Barra de probabilidad
 class BarraProbabilidad(tk.Canvas):
     H = 28
 
