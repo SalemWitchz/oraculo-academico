@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 """
 
-   SISTEMA DE ANÁLISIS ESTADÍSTICO ACADÉMICO         
-   Hipótesis B — Situación Laboral → Rendimiento     
-   Probabilidad y Estadística                        
+   SISTEMA DE ANALISIS ESTADISTICO ACADEMICO
+   Hipotesis B — Situación Laboral → Rendimiento
+
 
 Ejecutar:  python main.py
 Instalar:  pip install -r requirements.txt
+
 """
+
 import sys
 from pathlib import Path
 

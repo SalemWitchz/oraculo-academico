@@ -1,0 +1,183 @@
+====================================================
+  LIBRERIAS UTILIZADAS EN ORACULO ACADEMICO
+====================================================
+
+Este documento describe cada libreria externa e interna
+utilizada en el proyecto, su proposito y donde aparece.
+
+----------------------------------------------------
+1. numpy  (numpy>=1.24.0)
+----------------------------------------------------
+Que es:
+  Libreria fundamental de Python para computacion numerica.
+  Proporciona arreglos multidimensionales (arrays) y una
+  gran coleccion de funciones matematicas de alto rendimiento.
+
+Para que se usa en el proyecto:
+  - Calcular medidas estadisticas: media, mediana, desviacion
+    estandar, varianza, percentiles, minimo y maximo sobre
+    los datos de calificaciones de los estudiantes.
+  - Realizar operaciones vectorizadas para clasificar a los
+    alumnos por nivel de desempeno (bajo, medio, alto).
+  - Soporte matematico para el modulo de regresion lineal
+    simple (calculo de pendiente e intercepto por minimos
+    cuadrados).
+  - Generar el eje X de las curvas de distribucion normal
+    que se grafican en la interfaz.
+  - Calcular estadisticos dentro del modelo de prediccion
+    (Oraculo): promedio del grupo, desviacion estandar, z-scores.
+
+Archivos donde aparece:
+  stats/descriptiva.py, stats/exportar_pdf.py,
+  stats/modelo_prediccion.py, stats/prueba_hipotesis.py,
+  stats/regresion_lineal.py, ui/screens/grimorio_screen.py,
+  ui/screens/grimorio_avanzado_screen.py,
+  ui/screens/juicio_screen.py
+
+----------------------------------------------------
+2. scipy  (scipy>=1.10.0)
+----------------------------------------------------
+Que es:
+  Libreria cientifica que extiende a numpy con algoritmos
+  avanzados de estadistica, optimizacion, algebra lineal,
+  procesamiento de senales, entre otros.
+
+Para que se usa en el proyecto:
+  - Calcular la funcion de distribucion acumulada (CDF) y la
+    funcion de densidad de probabilidad (PDF) de la distribucion
+    normal para graficar la curva de Gauss y determinar la
+    zona de aprobacion/reprobacion.
+  - Ejecutar la prueba de hipotesis t de Student de una muestra
+    (scipy.stats.ttest_1samp) para evaluar si el promedio del
+    grupo es significativamente distinto de una media de referencia.
+  - Calcular el valor p (p-value) e interpretar la significancia
+    estadistica de los resultados.
+  - Obtener la puntuacion z critica (z-score) para diferentes
+    niveles de confianza mediante la funcion ppf (percentil
+    de la normal).
+
+Archivos donde aparece:
+  stats/descriptiva.py, stats/exportar_pdf.py,
+  stats/modelo_prediccion.py, stats/prueba_hipotesis.py,
+  ui/screens/grimorio_screen.py,
+  ui/screens/grimorio_avanzado_screen.py,
+  ui/screens/juicio_screen.py
+
+----------------------------------------------------
+3. pandas  (pandas>=2.0.0)
+----------------------------------------------------
+Que es:
+  Libreria de analisis y manipulacion de datos. Su estructura
+  principal es el DataFrame, similar a una hoja de calculo o
+  tabla de base de datos, ideal para manejar datos tabulares.
+
+Para que se usa en el proyecto:
+  - Almacenar y gestionar la lista de estudiantes dentro del
+    DataStore (el repositorio central de datos de la app).
+  - Convertir la lista de objetos Estudiante a un DataFrame
+    para facilitar filtros, ordenamientos y exportaciones.
+  - Exportar los datos de los alumnos a un archivo CSV desde
+    la pantalla de ingreso de datos.
+  - Servir de capa intermedia entre los datos crudos y los
+    calculos estadisticos del resto de modulos.
+
+Archivos donde aparece:
+  data/data_store.py
+
+----------------------------------------------------
+4. matplotlib  (matplotlib>=3.7.0)
+----------------------------------------------------
+Que es:
+  Libreria de visualizacion de datos en Python. Permite crear
+  graficas de alta calidad: histogramas, graficas de barras,
+  diagramas de dispersion, curvas, etc.
+
+Para que se usa en el proyecto:
+  - Renderizar dentro de la ventana de tkinter las graficas
+    interactivas usando el backend TkAgg
+    (FigureCanvasTkAgg).
+  - Dibujar la curva de distribucion normal con sombreado de
+    zona de aprobacion y reprobacion en el Grimorio.
+  - Generar histogramas de calificaciones y graficas de
+    regresion lineal en el Juicio Final.
+  - Exportar graficas al reporte PDF usando el backend PDF
+    (PdfPages) en exportar_pdf.py.
+  - Usar gridspec para componer layouts de multiples graficas
+    dentro del reporte.
+
+Archivos donde aparece:
+  ui/main_window.py, stats/exportar_pdf.py,
+  ui/screens/grimorio_screen.py, ui/screens/juicio_screen.py
+
+----------------------------------------------------
+5. python-docx  (python-docx>=1.1.0)
+----------------------------------------------------
+Que es:
+  Libreria para crear y modificar documentos de Microsoft Word
+  (.docx) desde Python.
+
+Para que se usa en el proyecto:
+  Fue incorporada como dependencia durante una etapa anterior
+  del proyecto en la que se generaban reportes en formato Word.
+  Esa funcionalidad fue removida del codigo fuente en commits
+  recientes (ver historial git). Actualmente la libreria no
+  se importa en ningun modulo activo del proyecto pero se
+  mantiene en requirements.txt por compatibilidad con
+  instalaciones existentes.
+
+Archivos donde aparece:
+  Ninguno activo en el codigo actual.
+
+----------------------------------------------------
+6. tkinter  (incluida en Python, no requiere instalacion)
+----------------------------------------------------
+Que es:
+  Modulo estandar de Python para crear interfaces graficas de
+  usuario (GUI) de escritorio. Viene incluido con la
+  instalacion oficial de Python, por eso no aparece en
+  requirements.txt.
+
+Para que se usa en el proyecto:
+  - Construir toda la interfaz grafica: ventana principal,
+    pantallas (Home, Ingreso de Datos, Grimorio, Juicio Final,
+    Profecia, Rituales, Guia, Creditos), botones, etiquetas,
+    entradas de texto, tablas y paneles desplazables.
+  - Gestionar la navegacion entre pantallas mediante el
+    sistema de stacking de frames.
+  - Mostrar dialogos de apertura de archivos (filedialog) y
+    mensajes de error/confirmacion (messagebox).
+  - Integrar las graficas de matplotlib dentro de la ventana
+    de la aplicacion mediante FigureCanvasTkAgg.
+
+Archivos donde aparece:
+  ui/main_window.py, ui/widgets.py y todos los archivos
+  dentro de ui/screens/
+
+====================================================
+  LIBRERIAS ESTANDAR DE PYTHON UTILIZADAS
+  (no requieren instalacion adicional)
+====================================================
+
+- csv        : Lectura y escritura de archivos CSV planos.
+- re         : Expresiones regulares para limpiar y validar
+               cadenas de texto al importar CSVs.
+- hashlib    : Generacion de identificadores unicos (hash MD5)
+               para detectar duplicados al importar alumnos.
+- random     : Generacion de datos de muestra aleatorios.
+- unicodedata: Normalizacion de caracteres unicode para
+               comparar cadenas con acentos o caracteres
+               especiales.
+- pathlib    : Manejo de rutas de archivos de forma
+               multiplataforma (Path).
+- sys        : Acceso a parametros del interprete de Python.
+- datetime   : Registro de la fecha y hora de generacion en
+               los reportes PDF.
+- dataclasses: Decoradores @dataclass y @field para definir
+               las clases de datos (Estudiante, ResultadoDesc,
+               etc.) de forma concisa.
+- typing     : Anotaciones de tipo (List, Callable) para
+               mayor claridad en las firmas de funciones.
+
+====================================================
+  FIN DEL DOCUMENTO
+====================================================

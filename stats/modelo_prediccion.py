@@ -55,8 +55,8 @@ def _recomendaciones(trabaja: bool, horas_estudio: float, nivel: str) -> list[st
                 "Evalúa reducir horas de trabajo si es posible, "
                 "o busca apoyo institucional (becas, tutorías)."
             )
-    if horas_estudio < 10:
-        extra = 10 - int(horas_estudio)
+    if horas_estudio < 16:
+        extra = 16 - int(horas_estudio)
         rec.append(f"Incrementa tu tiempo de estudio — al menos {extra} hrs/sem más harán diferencia.")
     if nivel == "En Riesgo":
         rec.append("Solicita asesoría académica con tu docente esta semana.")
@@ -95,12 +95,16 @@ class Oraculo:
         grupo_base = self._m_trab if trabaja else self._m_no
         se         = self._s_trab if trabaja else self._s_no
 
-        # Ancla en el promedio real del alumno; si no hay dato usa la media del grupo
-        base = promedio_actual if promedio_actual is not None else grupo_base
+        # Blend 70% promedio real + 30% media del grupo para que trabaja siempre influya
+        if promedio_actual is not None:
+            base = 0.7 * promedio_actual + 0.3 * grupo_base
+        else:
+            base = grupo_base
 
-        # Interpolación lineal: 0 hrs → promedio actual, 16 hrs → 10
+        # Interpolación lineal: 0 hrs → base, 16 hrs → techo (9.5 si trabaja, 10 si no)
+        ceiling    = 9.5 if trabaja else 10.0
         horas_norm = min(horas_estudio, 16.0) / 16.0
-        cal = round(min(10.0, max(0.0, base + horas_norm * (10.0 - base))), 2)
+        cal = round(min(ceiling, max(0.0, base + horas_norm * (ceiling - base))), 2)
 
         prob_ap = float(sp_stats.norm.sf(5.9, loc=cal, scale=se))
         prob_ap = max(0.0, min(1.0, prob_ap))

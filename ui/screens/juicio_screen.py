@@ -181,8 +181,8 @@ class JuicioScreen:
             ("media_grupo", "Media del grupo  (μ):"),
             ("desv_grupo",  "Desv. estándar grupo  (σ):"),
             ("horas",       "Horas de estudio del alumno:"),
-            ("ajuste_form", "Ajuste por horas  (fórmula):"),
-            ("ajuste_val",  "Ajuste calculado:"),
+            ("ajuste_form", "Normalización de horas  (fórmula):"),
+            ("ajuste_val",  "Normalización calculada:"),
             ("cal_form",    "Calificación predicha  (fórmula):"),
             ("cal_val",     "Calificación predicha  (resultado):"),
             ("prob_form",   "P(aprobar ≥ 6)  (fórmula):"),
@@ -344,10 +344,11 @@ class JuicioScreen:
         orac = self._oraculo
         mu   = orac.media_trabaja   if trabaja_sim else orac.media_no_trabaja
         se   = orac._s_trab         if trabaja_sim else orac._s_no
-        hrs  = e.horas_estudio
-        ajuste_raw = (hrs - 10) * 0.04
-        cal_raw    = mu + ajuste_raw
-        cal        = min(10.0, max(0.0, cal_raw))
+        hrs        = e.horas_estudio
+        ceiling    = 9.5 if trabaja_sim else 10.0
+        horas_norm = min(hrs, 16.0) / 16.0
+        cal_raw    = mu + horas_norm * (ceiling - mu)
+        cal        = min(ceiling, max(0.0, cal_raw))
         prob_ap    = float(sp_stats.norm.sf(5.9, loc=cal, scale=se))
         prob_ap    = max(0.0, min(1.0, prob_ap))
 
@@ -359,25 +360,20 @@ class JuicioScreen:
         v = self._calculo_vars
         v["grupo_sim"].set(grupo_str)
         v["media_grupo"].set(
-            f"{mu:.4f}   ← promedio observado de todos los alumnos del grupo '{grupo_str}'"
+            f"{mu:.4f}   ← promedio observado del grupo '{grupo_str}'"
         )
         v["desv_grupo"].set(
             f"{se:.4f}   ← desviación estándar del grupo '{grupo_str}'"
         )
-        v["horas"].set(f"{hrs:.1f} hrs/sem")
-        v["ajuste_form"].set("ajuste  =  (horas_estudio − 10)  ×  0.04")
+        v["horas"].set(f"{hrs:.1f} hrs/sem   (techo: {ceiling})")
+        v["ajuste_form"].set("norm  =  min(horas, 16) / 16")
         v["ajuste_val"].set(
-            f"({hrs:.1f} − 10)  ×  0.04  =  {hrs - 10:.1f}  ×  0.04  =  {ajuste_raw:+.4f} puntos"
+            f"min({hrs:.1f}, 16) / 16  =  {horas_norm:.4f}"
         )
-        if abs(cal_raw - cal) < 1e-9:
-            v["cal_form"].set("calificación  =  μ  +  ajuste")
-            v["cal_val"].set(f"{mu:.4f}  +  ({ajuste_raw:+.4f})  =  {cal:.4f}")
-        else:
-            v["cal_form"].set("calificación  =  clamp(μ + ajuste, 0, 10)")
-            v["cal_val"].set(
-                f"clamp({mu:.4f} + ({ajuste_raw:+.4f}), 0, 10)  "
-                f"=  clamp({cal_raw:.4f}, 0, 10)  =  {cal:.4f}"
-            )
+        v["cal_form"].set("calificación  =  μ  +  norm × (techo − μ)")
+        v["cal_val"].set(
+            f"{mu:.4f}  +  {horas_norm:.4f} × ({ceiling} − {mu:.4f})  =  {cal:.4f}"
+        )
         v["prob_form"].set(
             "P(aprobar)  =  P(X ≥ 6)  =  1 − Φ((5.9 − μ_pred) / σ_grupo)"
         )
